@@ -4,6 +4,9 @@
 
 import calendar,random,xlrd,os
 
+class değişkenler:
+  
+
 yıl=2019
 ay=1
 ek=0 #üyelere verilecek ek nöbet sayısı
