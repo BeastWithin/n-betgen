@@ -1,16 +1,19 @@
-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import calendar,random,xlrd,os
+import PySimpleGUI as sg
 
-class değişkenler:
-  
+class VT:
+ """global değişkenlerin kolay ulaşılabilmesi için class variable olarak atanması"""
 
-yıl=2019
-ay=1
+
+çıktı=""
+çlşDiz=""
+yıl,ay=2019,1 #hangi tarih için nöbet hazırlanaca
 ek=0 #üyelere verilecek ek nöbet sayısı
 aralık=2 #üyenin ne kadar aralıklı nöbet alacağı
+nöbLisDiz=""
 üyeler={'Pınar Bilgin', 'Yüksel Akgüneş', 'Gürkan Emre', 'Sinan Cengiz', 'Tayyar Uysal', 'Demet Hallaç', 'Özgen Baktır Karadaş', 'Pınar Ekmekçioğlu'}
 buay=calendar.monthrange(yıl,ay) #ayın 1 haftanın hangi günü ve ayın kaç gün olduğunu döndüren işlev
 aysözlük={i+1:0 for i in range(buay[1])} #programın sonunda günlere üye tutacak üye adlarının yazacağı takvim.
@@ -31,6 +34,8 @@ db={"sinan":{"PSÇ":45,"Pe":35,"Cu":48,"Ct":56,"Pa":32},
     "gürkan":{"PSÇ":15,"Pe":35,"Cu":44,"Ct":51,"Pa":38},
     }
 günindeks={0:"PSÇ",1:"PSÇ",2:"PSÇ",3:"Pe",4:"Cu",5:"Ct",6:"Pa"}
+
+
 
 class günlerinsayısı: #belirtilmiş mazeret günleri çıkarıldığında kalan takvimde alabileceği günleri verir
  def __init__(self,kişi,ay,yıl):
@@ -60,14 +65,16 @@ def EnAzGünKümesiniBulma():
 
 
 class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvimde ilgili güne yazar, o güne 1 ekler
- 
  def __init__(self,gün=0, aralık=aralık,ek=ek):
   
+  self.çıktı=""
   self.üye=0
   if gün:
    self.günküme=self.aydakigünkümesi(gün)
    self.üyelistesi=self.EnazGünSay(self.günküme)
    self.nöbetyaz(gün,aralık)
+   global çıktı
+   çıktı+=self.çıktı
   
   
  def EnazGünSay(self,günküme): #üyeler arasında belirtilen günün en az kim tarafından tutulduğunu ve ne kadar tutulduğunu döndürür.
@@ -89,17 +96,17 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
     if aysözlük[i]==üye:
      return False  
   def nöbetalmasayısıkontrol():#üyenin ay içindeki nöbet sayısı, aydaki gün sayısının üye sayısına bölümüne eşit mi?
-   print("ek="+str(ek))
+   self.çıktı+="ek="+str(ek)+"\n"
    return int(len(aysözlük)/len(üyeler))+ek==[i for i in aysözlük.values()].count(üye) 
   
   if gün in mazeretgün.get(üye): #üye için mazeret günü mü?
-   print(str(gün)+" için, "+str(üye)+" nin mazeret günü")
+   self.çıktı+=str(gün)+". gün için, "+str(üye)+" nin mazeret günü\n"
    return False
   elif nöbetalmasayısıkontrol():
-   print(str(gün)+" için, "+str(üye)+" en fazla gün sayısına ulaşmış")
+   self.çıktı+=str(gün)+". gün için, "+str(üye)+" en fazla gün sayısına ulaşmış\n"
    return False
   elif günaralıkkontrol()==False:
-   print(str(gün)+" için, "+str(aralık)+" gün içinde "+str(üye)+" yazılmış")
+   self.çıktı+=str(gün)+". gün için, "+str(aralık)+" gün içinde "+str(üye)+" yazılmış\n"
    return False
   else:
     return True
@@ -130,29 +137,30 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
    
 
 def çalıştır():#ay içinden rastgele seçip işleyen
+ global çıktı
  liste=[i for i in aysözlük if not aysözlük[i]] #üye atanmamış günleri süzmek için
  while liste:
   i=random.choice(liste)
   işle(gün=i,aralık=aralık)
   liste.remove(i)
  for a in üyeler:
-  print(a+" "+str([i for i in aysözlük.values()].count(a))) 
- print("Boş günlerin sayısı"+str([i for i in aysözlük.values()].count(0)))
+  çıktı+=a+" "+str([i for i in aysözlük.values()].count(a))+"\n"
+ çıktı+="Boş günlerin sayısı"+""+str([i for i in aysözlük.values()].count(0))+"\n"
   
 
 işlenenexcel=set()
 
-def okuveyaz():
- global db# daha sonra global kaldırıacak class kullanılacak
+def okuveyaz(çlşDiz=çlşDiz):
+ global db # daha sonra global kaldırıacak class kullanılacak
  db={üye:{gk:0 for gk in günindeks.values()} for üye in üyeler}
  global işlenenexcel
  sözlük = {}
- cwd=os.getcwd()
+ if not çlşDiz: çlşDiz=os.getcwd()
  for dosya in os.listdir(): #programın bulunduğu dizindeki dosyaların lisetelenmesi
   if ".xls" in dosya: #xls lerin süzülmesi
    if "~" not in dosya:# gizli kurtarma dosyalarını almasın diye
     işlenenexcel.add(dosya) #hangi xls lerin işlendiğine sonra bakabilmek için
-    file_handle = xlrd.open_workbook(os.path.join(cwd,dosya))
+    file_handle = xlrd.open_workbook(os.path.join(çlşDiz,dosya))
     sheet = file_handle.sheet_by_index(0) # xls deki ilk sayfaya odaklanmak
     
     for i in range(1,sheet.nrows):#ilk satırı atlayarak satırları ele almak
@@ -161,19 +169,70 @@ def okuveyaz():
      tarih=t[2::-1]# tarihin sırasını düzeltme
      üye=line[3]
      sözlük[tarih] = üye # xls deki veriyi sözlüğe aktarma
- for i in sözlük: #excellerden çekilen veriyi, üye bazlı sayıp, db sözlüğüne işliyor.
-  try: #günümüzde olmayan üyeleri db ye yazarken hata vermesin
-   db[sözlük[i]][günindeks[calendar.weekday(i[2],i[1],i[0])]]+=1 
-  except:
-   pass
+     for i in sözlük: #excellerden çekilen veriyi, üye bazlı sayıp, db sözlüğüne işliyor.
+      try:#günümüzde olmayan üyeleri db ye yazarken hata vermesin
+       db[sözlük[i]][günindeks[calendar.weekday(i[2],i[1],i[0])]]+=1 
+      except:
+       pass
 
 
  
+
 def deneme():
+ global çıktı
  okuveyaz()
  çalıştır()
  global ek
  ek=1
  çalıştır()
- for i in aysözlük: print(str(i)+" "+aysözlük[i])
+ for i in aysözlük: çıktı+=str(i)+" "+str(aysözlük[i])+"\n"
   
+  
+
+def GUI():
+ sg.theme('DarkAmber')  
+ 
+ global ay
+ global yıl
+ global nöbLisDiz
+ value=""
+ 
+ 
+ layout = [  [sg.Text('Önceki nöbet listelerinin olduğu dizin:'),sg.Input(),sg.FolderBrowse(key="nöbLisDiz",tooltip="Klasör seçme penceresi açılır",button_text="Klasör Aç")],
+             [sg.InputText(key="yıl",default_text=str(yıl),),sg.InputText(key="ay",default_text=str(ay))], 
+             [sg.Text(str(aralık)+' gün aralıkla nöbet verilir')], 
+             [sg.Text('Verilebilecek ek nöbet sayısı: '+str(ek))],
+             [sg.Text("Üyeler:"),sg.Listbox(üyeler),sg.Button(button_text="sil")],
+             [sg.Button("Yarat"), sg.Cancel()],
+             [sg.Multiline(str(value),size=(50,20),key="çıktı",autoscroll=True),],
+             ]
+ 
+ # Create the Window
+ window = sg.Window('NöbetGen', layout)
+ # Event Loop to process "events"
+ while True:
+  event, value = window.read()
+  if event in (None, 'Cancel'):
+   break
+  if event=="Yarat": deneme()
+  ay=value["ay"]
+  yıl=value["yıl"]
+  nöbLisDiz=value["nöbLisDiz"]
+  window["çıktı"].update(çıktı)
+
+ return event, window.close()
+
+
+#def d2v(d):
+ #for i in d.keys(): exec(i+"='"+d[i]+"'")
+ 
+ 
+ 
+class amk:
+ dışamk="amk"
+ def __init__(self):
+  self.içamk="amk"
+  
+def amkdeğiş():
+ amk.dışamk="asmsam"
+ return amk.dışamk
