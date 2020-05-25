@@ -4,17 +4,25 @@
 import calendar,random,xlrd,os
 import PySimpleGUI as sg
 
+def büyükHarfli(ad):
+ ad=ad.replace("i","İ")
+ return ad.upper()
+
 class VT:
  """global değişkenlerin kolay ulaşılabilmesi için class variable olarak atanması"""
-
-
-çıktı=""
+ işlenenexcel=set()
+ db=dict()
+ çekilenveri={}
+ çıktı=""
+ eşleşmeyenÜye={}
+ işlenenGünler={}
+ 
 çlşDiz=""
 yıl,ay=2019,1 #hangi tarih için nöbet hazırlanaca
 ek=0 #üyelere verilecek ek nöbet sayısı
 aralık=2 #üyenin ne kadar aralıklı nöbet alacağı
 nöbLisDiz=""
-üyeler={'Pınar Bilgin', 'Yüksel Akgüneş', 'Gürkan Emre', 'Sinan Cengiz', 'Tayyar Uysal', 'Demet Hallaç', 'Özgen Baktır Karadaş', 'Pınar Ekmekçioğlu'}
+üyeler={'PINAR BİLGİN', 'YÜKSEL AKGÜNEŞ', 'GÜRKAN EMRE', 'SİNAN CENGİZ', 'TAYYAR UYSAL', 'DEMET HALLAÇ', 'ÖZGEN BAKTIR KARADAŞ', 'PINAR EKMEKÇİOĞLU'}
 buay=calendar.monthrange(yıl,ay) #ayın 1 haftanın hangi günü ve ayın kaç gün olduğunu döndüren işlev
 aysözlük={i+1:0 for i in range(buay[1])} #programın sonunda günlere üye tutacak üye adlarının yazacağı takvim.
 #aysöz2={günindeks[calendar.monthcalendar(yıl,ay)[0].index(1)]}
@@ -28,11 +36,11 @@ for i in üyeler: #mazeretgün den get error vermemesi için eksik üyeler eklem
   
 üyedengüne={i:{i:0 for i in nöbetgünleri} for i in mazeretgün}
 gündenüyeye={i:{i:0 for i in mazeretgün} for i in nöbetgünleri}
-db={"sinan":{"PSÇ":45,"Pe":35,"Cu":48,"Ct":56,"Pa":32},
-    "pınar":{"PSÇ":31,"Pe":41,"Cu":41,"Ct":46,"Pa":33},
-    "demet":{"PSÇ":15,"Pe":35,"Cu":44,"Ct":51,"Pa":38},
-    "gürkan":{"PSÇ":15,"Pe":35,"Cu":44,"Ct":51,"Pa":38},
-    }
+#db={"sinan":{"PSÇ":45,"Pe":35,"Cu":48,"Ct":56,"Pa":32},
+    #"pınar":{"PSÇ":31,"Pe":41,"Cu":41,"Ct":46,"Pa":33},
+    #"demet":{"PSÇ":15,"Pe":35,"Cu":44,"Ct":51,"Pa":38},
+    #"gürkan":{"PSÇ":15,"Pe":35,"Cu":44,"Ct":51,"Pa":38},
+    #}
 günindeks={0:"PSÇ",1:"PSÇ",2:"PSÇ",3:"Pe",4:"Cu",5:"Ct",6:"Pa"}
 
 
@@ -67,7 +75,7 @@ def EnAzGünKümesiniBulma():
 class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvimde ilgili güne yazar, o güne 1 ekler
  def __init__(self,gün=0, aralık=aralık,ek=ek):
   
-  self.çıktı=""
+  self.çıktı=VT.çıktı
   self.üye=0
   if gün:
    self.günküme=self.aydakigünkümesi(gün)
@@ -137,7 +145,7 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
    
 
 def çalıştır():#ay içinden rastgele seçip işleyen
- global çıktı
+ çıktı=VT.çıktı
  liste=[i for i in aysözlük if not aysözlük[i]] #üye atanmamış günleri süzmek için
  while liste:
   i=random.choice(liste)
@@ -151,34 +159,45 @@ def çalıştır():#ay içinden rastgele seçip işleyen
 işlenenexcel=set()
 
 def okuveyaz(çlşDiz=çlşDiz):
- global db # daha sonra global kaldırıacak class kullanılacak
- db={üye:{gk:0 for gk in günindeks.values()} for üye in üyeler}
- global işlenenexcel
- sözlük = {}
+ #global db # daha sonra global kaldırıacak class kullanılacak
+ VT.db={üye:{gk:0 for gk in günindeks.values()} for üye in üyeler}
  if not çlşDiz: çlşDiz=os.getcwd()
  for dosya in os.listdir(): #programın bulunduğu dizindeki dosyaların lisetelenmesi
   if ".xls" in dosya: #xls lerin süzülmesi
    if "~" not in dosya:# gizli kurtarma dosyalarını almasın diye
-    işlenenexcel.add(dosya) #hangi xls lerin işlendiğine sonra bakabilmek için
-    file_handle = xlrd.open_workbook(os.path.join(çlşDiz,dosya))
-    sheet = file_handle.sheet_by_index(0) # xls deki ilk sayfaya odaklanmak
-    
-    for i in range(1,sheet.nrows):#ilk satırı atlayarak satırları ele almak
-     line=sheet.row_values(i)
-     t=xlrd.xldate_as_tuple(line[0],0) #xldate, exceldeki tarih damgasını tarihe çeviriyor.
-     tarih=t[2::-1]# tarihin sırasını düzeltme
-     üye=line[3]
-     sözlük[tarih] = üye # xls deki veriyi sözlüğe aktarma
-     for i in sözlük: #excellerden çekilen veriyi, üye bazlı sayıp, db sözlüğüne işliyor.
-      try:#günümüzde olmayan üyeleri db ye yazarken hata vermesin
-       db[sözlük[i]][günindeks[calendar.weekday(i[2],i[1],i[0])]]+=1 
-      except:
-       pass
+    açılanXLS = xlrd.open_workbook(os.path.join(çlşDiz,dosya))
+    açılanXLS = açılanXLS.sheet_by_index(0) # xls deki ilk sayfaya odaklanmak
+    VT.işlenenexcel.add(dosya) #hangi xls lerin işlendiğine sonra bakabilmek için    
+    for satırnumarası in range(açılanXLS.nrows):#ilk satırı atlayarak satırları ele almak
+     if any(açılanXLS.row_values(satırnumarası)): #boş satırları geçmek
+      tarih,üye="",""      
+      for i in açılanXLS.row_values(satırnumarası):
+       if type(i) is float: #liste öğesi tarih mi sorgusu
+        tarih=xlrd.xldate_as_tuple(i,0) #xldate, exceldeki tarih damgasını tarihe çeviriyor.
+        tarih=tarih[2::-1]# tarihin sırasını düzeltme
+       elif type(i) is str: #liste öğesi kişi adı mı sorgusu
+        if i.split().__len__()>1: #"birden fazla kelime ise kişi adıdır" mantığı
+         if not üye:
+          üye=büyükHarfli(i) #o tarihe yazılı üyeyi alma
+      if tarih and üye:
+       VT.çekilenveri[tarih] = üye # xls deki veriyi sözlüğe aktarma
+ for i in VT.çekilenveri: #excellerden çekilen veriyi, üye bazlı sayıp, db sözlüğüne işliyor.
+  işlGünKüm=günindeks[calendar.weekday(i[2],i[1],i[0])] #çekilen tarih verisini günkümesine çevirir
+  işlÜye=VT.çekilenveri[i] #çekilen üye verisini kayıt etme
+  try:#günümüzde olmayan üyeleri db ye yazarken hata vermesin
+   VT.db[işlÜye][işlGünKüm]+=1 
+   VT.işlenenGünler[i]=işlÜye
+  except:
+   VT.eşleşmeyenÜye[i]=işlÜye
+   pass
+ 
+
 
 
  
 
 def deneme():
+ 
  global çıktı
  okuveyaz()
  çalıştır()
@@ -202,10 +221,16 @@ def GUI():
              [sg.InputText(key="yıl",default_text=str(yıl),),sg.InputText(key="ay",default_text=str(ay))], 
              [sg.Text(str(aralık)+' gün aralıkla nöbet verilir')], 
              [sg.Text('Verilebilecek ek nöbet sayısı: '+str(ek))],
-             [sg.Text("Üyeler:"),sg.Listbox(üyeler),sg.Button(button_text="sil")],
+             [sg.Text("Üyeler:"),sg.Listbox(üyeler,size=(20,5)),sg.Button(button_text="sil")],
              [sg.Button("Yarat"), sg.Cancel()],
              [sg.Multiline(str(value),size=(50,20),key="çıktı",autoscroll=True),],
              ]
+ def tabloGUI(başlık=("başlık_1","başlık_2"),satırsayısı=10,tabloadı="tbl"): #tablo GUIsi
+  başlık =  [[sg.Text('  ')] + [sg.Text(h, size=(14,1)) for h in başlık]]
+  satırlar = [[sg.Input(key=tabloadı+str(stn)+str(satır),size=(15,1), pad=(0,0)) for stn in range(len(başlık))] for satır in range(satırsayısı)]
+  tablo = başlık+satırlar
+  return tablo
+ 
  
  # Create the Window
  window = sg.Window('NöbetGen', layout)
@@ -222,17 +247,3 @@ def GUI():
 
  return event, window.close()
 
-
-#def d2v(d):
- #for i in d.keys(): exec(i+"='"+d[i]+"'")
- 
- 
- 
-class amk:
- dışamk="amk"
- def __init__(self):
-  self.içamk="amk"
-  
-def amkdeğiş():
- amk.dışamk="asmsam"
- return amk.dışamk
