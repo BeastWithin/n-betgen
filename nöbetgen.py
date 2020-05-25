@@ -16,11 +16,13 @@ class VT:
  çıktı=""
  eşleşmeyenÜye={}
  işlenenGünler={}
+ ek=0 
+ aralık=2 #üyenin ne kadar aralıklı nöbet alacağı
+ 
  
 çlşDiz=""
 yıl,ay=2019,1 #hangi tarih için nöbet hazırlanaca
-ek=0 #üyelere verilecek ek nöbet sayısı
-aralık=2 #üyenin ne kadar aralıklı nöbet alacağı
+#üyelere verilecek ek nöbet sayısı
 nöbLisDiz=""
 üyeler={'PINAR BİLGİN', 'YÜKSEL AKGÜNEŞ', 'GÜRKAN EMRE', 'SİNAN CENGİZ', 'TAYYAR UYSAL', 'DEMET HALLAÇ', 'ÖZGEN BAKTIR KARADAŞ', 'PINAR EKMEKÇİOĞLU'}
 buay=calendar.monthrange(yıl,ay) #ayın 1 haftanın hangi günü ve ayın kaç gün olduğunu döndüren işlev
@@ -73,27 +75,29 @@ def EnAzGünKümesiniBulma():
 
 
 class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvimde ilgili güne yazar, o güne 1 ekler
- def __init__(self,gün=0, aralık=aralık,ek=ek):
-  
+ 
+
+ def __init__(self,gün=0, ):
+  self.aralık=VT.aralık
+  self.ek=VT.ek
+  self.db=VT.db
   self.çıktı=VT.çıktı
-  self.üye=0
+
   if gün:
    self.günküme=self.aydakigünkümesi(gün)
    self.üyelistesi=self.EnazGünSay(self.günküme)
-   self.nöbetyaz(gün,aralık)
-   global çıktı
-   çıktı+=self.çıktı
+   self.nöbetyaz(gün,self.aralık)
   
   
  def EnazGünSay(self,günküme): #üyeler arasında belirtilen günün en az kim tarafından tutulduğunu ve ne kadar tutulduğunu döndürür.
-  sıralı=[(db[üye][gün],üye) for üye in db for gün in db[üye] if gün==günküme] #min() fonksiyonu ilk sıradaki girdiye göre sıralar, bunlar eşitse ikinciye göre sıralamaya devam eder
+  sıralı=[(self.db[üye][gün],üye) for üye in self.db for gün in self.db[üye] if gün==günküme] #min() fonksiyonu ilk sıradaki girdiye göre sıralar, bunlar eşitse ikinciye göre sıralamaya devam eder
   sıralı.sort() #sort küçükten büyüğe sıralıyor.
   return sıralı
  
  def DB1Arttır(self,üye,günküme): #nöbet yazılan üyenin ilgili gün için nöbet sayısını 1 arttırır.
-  db[üye][günküme]+=1
+  self.db[üye][günküme]+=1
  
- def üyekontrol(self,üye,gün,aralık,):
+ def üyekontrol(self,üye,gün,aralık,ek):
   """Sırasıyla;
   Belirtilen gün üyenin mazeret günü mü,
   üyenin aydaki alacağı en çok nöbet sayısını geçiyor mu,
@@ -123,7 +127,7 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
  def nöbetyaz(self,gün,aralık): #aysözlüke bulunan üyeyi ilgili güne yazmak için 
   for i in self.üyelistesi:
    üye=i[1]
-   if self.üyekontrol(üye,gün,aralık):
+   if self.üyekontrol(üye,gün,VT.aralık,VT.ek):
     aysözlük[gün]=üye
     self.üye=üye
     self.DB1Arttır(üye,self.günküme)
@@ -149,7 +153,7 @@ def çalıştır():#ay içinden rastgele seçip işleyen
  liste=[i for i in aysözlük if not aysözlük[i]] #üye atanmamış günleri süzmek için
  while liste:
   i=random.choice(liste)
-  işle(gün=i,aralık=aralık)
+  işle(gün=i,)
   liste.remove(i)
  for a in üyeler:
   çıktı+=a+" "+str([i for i in aysözlük.values()].count(a))+"\n"
@@ -198,13 +202,11 @@ def okuveyaz(çlşDiz=çlşDiz):
 
 def deneme():
  
- global çıktı
  okuveyaz()
  çalıştır()
- global ek
- ek=1
+ VT.ek=1
  çalıştır()
- for i in aysözlük: çıktı+=str(i)+" "+str(aysözlük[i])+"\n"
+ for i in aysözlük: VT.çıktı+=str(i)+" "+str(aysözlük[i])+"\n"
   
   
 
