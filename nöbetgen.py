@@ -10,26 +10,32 @@ def büyükHarfli(ad):
 
 class VT:
  """global değişkenlerin kolay ulaşılabilmesi için class variable olarak atanması"""
- işlenenexcel=set()
- db=dict()
- çekilenveri={}
- çıktı=""
+ işlenenXLS=set()
+ db={}
+ çekilenVeri={}
+ çıktı={"Üye Kontrol Çıktısı":"",}
  eşleşmeyenÜye={}
  işlenenGünler={}
  ek=0 
  aralık=2 #üyenin ne kadar aralıklı nöbet alacağı
+
+ def çıktıEkle(self,key,value):
+  self.çıktı[key]=value
+ def çıktıDök(self):
+  for i in self.çıktı:
+   print(i+"\n"+self.çıktı[i])
  
  
 çlşDiz=""
 yıl,ay=2019,1 #hangi tarih için nöbet hazırlanaca
-#üyelere verilecek ek nöbet sayısı
 nöbLisDiz=""
-üyeler={'PINAR BİLGİN', 'YÜKSEL AKGÜNEŞ', 'GÜRKAN EMRE', 'SİNAN CENGİZ', 'TAYYAR UYSAL', 'DEMET HALLAÇ', 'ÖZGEN BAKTIR KARADAŞ', 'PINAR EKMEKÇİOĞLU'}
+#üyelere verilecek ek nöbet sayısı
+üyeler={'PINAR BİLGİN', 'YÜKSEL AKGÜNEŞ', 'GÜRKAN EMRE', 'SİNAN CENGİZ', 'TAYYAR UYSAL', 'DEMET HALLAÇ', 'ÖZGEN BAKTIR KARADAŞ', 'PINAR EKMEKÇİOĞLU', }
 buay=calendar.monthrange(yıl,ay) #ayın 1 haftanın hangi günü ve ayın kaç gün olduğunu döndüren işlev
 aysözlük={i+1:0 for i in range(buay[1])} #programın sonunda günlere üye tutacak üye adlarının yazacağı takvim.
 #aysöz2={günindeks[calendar.monthcalendar(yıl,ay)[0].index(1)]}
-nöbetgünleri=("PSÇ","Pe","Cu","Ct","Pa") #gün kümelerinin demeti. aynı öneme sahip olan pazartesi 1salı çarşamba günleri aynı kümeye alındı.
-mazeretgün={"Sinan Cengiz":[16,17,18,19],
+nöbetgünleri=("PSÇ","Pe","Cu","Ct","Pa") #gün kümelerinin demeti. aynı öneme sahip olan pazartesi salı çarşamba günleri aynı kümeye alındı.
+mazeretgün={"SİNAN CENGİZ":[16,17,18,19], "PINAR EKMEKÇİOĞLU":[1,6,14,23]
              } # üyelerin mazeret günlerini içeren dict
 
 for i in üyeler: #mazeretgün den get error vermemesi için eksik üyeler eklemek
@@ -78,24 +84,21 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
  
 
  def __init__(self,gün=0, ):
-  self.aralık=VT.aralık
   self.ek=VT.ek
-  self.db=VT.db
-  self.çıktı=VT.çıktı
 
   if gün:
    self.günküme=self.aydakigünkümesi(gün)
-   self.üyelistesi=self.EnazGünSay(self.günküme)
-   self.nöbetyaz(gün,self.aralık)
+   self.üyelistesi=self.EnazGünSay(self.günküme,VT.db)
+   self.nöbetyaz(gün,VT.aralık)
   
   
- def EnazGünSay(self,günküme): #üyeler arasında belirtilen günün en az kim tarafından tutulduğunu ve ne kadar tutulduğunu döndürür.
-  sıralı=[(self.db[üye][gün],üye) for üye in self.db for gün in self.db[üye] if gün==günküme] #min() fonksiyonu ilk sıradaki girdiye göre sıralar, bunlar eşitse ikinciye göre sıralamaya devam eder
+ def EnazGünSay(self,günküme,db): #üyeler arasında belirtilen günün en az kim tarafından tutulduğunu ve ne kadar tutulduğunu döndürür.
+  sıralı=[(db[üye][gün],üye) for üye in db for gün in db[üye] if gün==günküme] #min() fonksiyonu ilk sıradaki girdiye göre sıralar, bunlar eşitse ikinciye göre sıralamaya devam eder
   sıralı.sort() #sort küçükten büyüğe sıralıyor.
   return sıralı
  
  def DB1Arttır(self,üye,günküme): #nöbet yazılan üyenin ilgili gün için nöbet sayısını 1 arttırır.
-  self.db[üye][günküme]+=1
+  VT.db[üye][günküme]+=1
  
  def üyekontrol(self,üye,gün,aralık,ek):
   """Sırasıyla;
@@ -103,27 +106,28 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
   üyenin aydaki alacağı en çok nöbet sayısını geçiyor mu,
   belirtilen aralık kadar ileri ve gerideki günlerde nöbeti var mı,
   sorularını boolean olarak yanıtlar."""
+  çıktı=VT.çıktı
+  ç="Üye Kontrol Çıktısı"
+  
   def günaralıkkontrol():
    for i in [i+gün for i in range(-1*aralık,aralık+1) if len(aysözlük)>=i+gün>0]:#verilen günün, belirtilen aralık kadar öncesinden sonrasına kadar nöbeti varmı diye sorgulayan fonksiyon
     if aysözlük[i]==üye:
      return False  
   def nöbetalmasayısıkontrol():#üyenin ay içindeki nöbet sayısı, aydaki gün sayısının üye sayısına bölümüne eşit mi?
-   self.çıktı+="ek="+str(ek)+"\n"
    return int(len(aysözlük)/len(üyeler))+ek==[i for i in aysözlük.values()].count(üye) 
   
   if gün in mazeretgün.get(üye): #üye için mazeret günü mü?
-   self.çıktı+=str(gün)+". gün için, "+str(üye)+" nin mazeret günü\n"
+   çıktı[ç]+=str(gün)+". gün için, "+str(üye)+" nin mazeret günü\n"
    return False
   elif nöbetalmasayısıkontrol():
-   self.çıktı+=str(gün)+". gün için, "+str(üye)+" en fazla gün sayısına ulaşmış\n"
+   çıktı[ç]+=str(gün)+". gün için, "+str(üye)+" en fazla gün sayısına ulaşmış\n"
    return False
   elif günaralıkkontrol()==False:
-   self.çıktı+=str(gün)+". gün için, "+str(aralık)+" gün içinde "+str(üye)+" yazılmış\n"
+   çıktı[ç]+=str(gün)+". gün için, "+str(aralık)+" gün içinde "+str(üye)+" yazılmış\n"
    return False
   else:
     return True
-   
-   
+      
  def nöbetyaz(self,gün,aralık): #aysözlüke bulunan üyeyi ilgili güne yazmak için 
   for i in self.üyelistesi:
    üye=i[1]
@@ -149,7 +153,7 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
    
 
 def çalıştır():#ay içinden rastgele seçip işleyen
- çıktı=VT.çıktı
+ çıktı=""
  liste=[i for i in aysözlük if not aysözlük[i]] #üye atanmamış günleri süzmek için
  while liste:
   i=random.choice(liste)
@@ -158,9 +162,8 @@ def çalıştır():#ay içinden rastgele seçip işleyen
  for a in üyeler:
   çıktı+=a+" "+str([i for i in aysözlük.values()].count(a))+"\n"
  çıktı+="Boş günlerin sayısı"+""+str([i for i in aysözlük.values()].count(0))+"\n"
-  
+ VT().çıktıEkle("Sonuç çıktısı",çıktı)
 
-işlenenexcel=set()
 
 def okuveyaz(çlşDiz=çlşDiz):
  #global db # daha sonra global kaldırıacak class kullanılacak
@@ -171,7 +174,7 @@ def okuveyaz(çlşDiz=çlşDiz):
    if "~" not in dosya:# gizli kurtarma dosyalarını almasın diye
     açılanXLS = xlrd.open_workbook(os.path.join(çlşDiz,dosya))
     açılanXLS = açılanXLS.sheet_by_index(0) # xls deki ilk sayfaya odaklanmak
-    VT.işlenenexcel.add(dosya) #hangi xls lerin işlendiğine sonra bakabilmek için    
+    VT.işlenenXLS.add(dosya) #hangi xls lerin işlendiğine sonra bakabilmek için    
     for satırnumarası in range(açılanXLS.nrows):#ilk satırı atlayarak satırları ele almak
      if any(açılanXLS.row_values(satırnumarası)): #boş satırları geçmek
       tarih,üye="",""      
@@ -181,13 +184,13 @@ def okuveyaz(çlşDiz=çlşDiz):
         tarih=tarih[2::-1]# tarihin sırasını düzeltme
        elif type(i) is str: #liste öğesi kişi adı mı sorgusu
         if i.split().__len__()>1: #"birden fazla kelime ise kişi adıdır" mantığı
-         if not üye:
+         if not üye: #ilk saptadığı adı alması için
           üye=büyükHarfli(i) #o tarihe yazılı üyeyi alma
       if tarih and üye:
-       VT.çekilenveri[tarih] = üye # xls deki veriyi sözlüğe aktarma
- for i in VT.çekilenveri: #excellerden çekilen veriyi, üye bazlı sayıp, db sözlüğüne işliyor.
+       VT.çekilenVeri[tarih] = üye # xls deki veriyi sözlüğe aktarma
+ for i in VT.çekilenVeri: #excellerden çekilen veriyi, üye bazlı sayıp, db sözlüğüne işliyor.
   işlGünKüm=günindeks[calendar.weekday(i[2],i[1],i[0])] #çekilen tarih verisini günkümesine çevirir
-  işlÜye=VT.çekilenveri[i] #çekilen üye verisini kayıt etme
+  işlÜye=VT.çekilenVeri[i] #çekilen üye verisini kayıt etme
   try:#günümüzde olmayan üyeleri db ye yazarken hata vermesin
    VT.db[işlÜye][işlGünKüm]+=1 
    VT.işlenenGünler[i]=işlÜye
@@ -201,18 +204,20 @@ def okuveyaz(çlşDiz=çlşDiz):
  
 
 def deneme():
- 
+ çıktı=""
  okuveyaz()
  çalıştır()
  VT.ek=1
  çalıştır()
- for i in aysözlük: VT.çıktı+=str(i)+" "+str(aysözlük[i])+"\n"
-  
+ for i in aysözlük: çıktı+=str(i)+" "+str(aysözlük[i])+"\n"
+ VT.çıktı["Sonuç"]=çıktı
   
 
 def GUI():
  sg.theme('DarkAmber')  
- 
+ aralık=VT.aralık
+ çıktı=VT.çıktı
+ ek=VT.ek
  global ay
  global yıl
  global nöbLisDiz
@@ -225,7 +230,7 @@ def GUI():
              [sg.Text('Verilebilecek ek nöbet sayısı: '+str(ek))],
              [sg.Text("Üyeler:"),sg.Listbox(üyeler,size=(20,5)),sg.Button(button_text="sil")],
              [sg.Button("Yarat"), sg.Cancel()],
-             [sg.Multiline(str(value),size=(50,20),key="çıktı",autoscroll=True),],
+             [sg.Multiline(size=(30,20),key="çıktı",autoscroll=True), sg.Multiline(size=(30,20),key="sonuç",autoscroll=True),]
              ]
  def tabloGUI(başlık=("başlık_1","başlık_2"),satırsayısı=10,tabloadı="tbl"): #tablo GUIsi
   başlık =  [[sg.Text('  ')] + [sg.Text(h, size=(14,1)) for h in başlık]]
@@ -246,6 +251,8 @@ def GUI():
   yıl=value["yıl"]
   nöbLisDiz=value["nöbLisDiz"]
   window["çıktı"].update(çıktı)
+  window["sonuç"].update(çıktı["Sonuç"])
+  
 
  return event, window.close()
 
