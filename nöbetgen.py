@@ -204,7 +204,7 @@ def okuveyaz(çlşDiz=çlşDiz):
 
 def deneme():
  çıktı=""
- okuveyaz(çlşDiz="D:\Eczane\SİNAN\denemeler\nöbet listeleri")
+ okuveyaz(çlşDiz="")
  çalıştır()
  VT.ek=1
  çalıştır()
@@ -259,23 +259,27 @@ def GUI():
 def xlyaz(ay=ay,yıl=yıl,sz=aysözlük,ünvan="Ecz."):
 
  style0 = xlwt.easyxf('font: name Times New Roman, color-index red, bold on', num_format_str='#,##0.00')
- style1 = xlwt.easyxf(num_format_str='D-MM-YY')
+ style1 = xlwt.easyxf(num_format_str="dd/mm/yyyy")
+ date_format = xlwt.XFStyle()
+ date_format.num_format_str = 'dd/mm/yyyy'
  
  wb = xlwt.Workbook()
  ws = wb.add_sheet(str(ay)+str(yıl))
  
- header=("Tarih","Gün","Ünvan","Nöbetçi Adı","Yardımcı Personel")
+ başlık=("Tarih","Gün","Ünvan","Nöbetçi Adı","Yardımcı Personel")
+ 
  def satırOluştur(ws,satırNo,liste,):
   for n,girdi in enumerate(liste): ws.write(satırNo,n,girdi)
   
- 
+ satırOluştur(ws,0,başlık)
  for g in sz:
-  satırOluştur(ws,g,(calendar.day_name[calendar.datetime.date(yıl,ay,g).weekday()],ünvan,sz[g],))
+  satırOluştur(ws,g,(calendar.datetime.date(yıl,ay,g),calendar.day_name[calendar.datetime.date(yıl,ay,g).weekday()],ünvan,sz[g],))
 
  #ws.write(0, 0, 1234.56, style0)
  #ws.write(1, 0, datetime.now(), style1)
  #ws.write(2, 0, 1)
  #ws.write(2, 1, 1)
  #ws.write(2, 2, xlwt.Formula("A3+B3"))
+ ws.col(0).set_style(date_format)
  
  wb.save(str(ay)+'.'+str(yıl)+".xls") 
