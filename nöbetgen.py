@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import calendar,random,xlrd,os
-import PySimpleGUI as sg
+import calendar,random,xlwt,xlrd,os
+#import PySimpleGUI as sg
 
 def büyükHarfli(ad):
  ad=ad.replace("i","İ")
@@ -28,10 +28,9 @@ class VT:
  
 çlşDiz=""
 yıl,ay=2019,1 #hangi tarih için nöbet hazırlanaca
-nöbLisDiz=""
 #üyelere verilecek ek nöbet sayısı
 üyeler={'PINAR BİLGİN', 'YÜKSEL AKGÜNEŞ', 'GÜRKAN EMRE', 'SİNAN CENGİZ', 'TAYYAR UYSAL', 'DEMET HALLAÇ', 'ÖZGEN BAKTIR KARADAŞ', 'PINAR EKMEKÇİOĞLU', }
-buay=calendar.monthrange(yıl,ay) #ayın 1 haftanın hangi günü ve ayın kaç gün olduğunu döndüren işlev
+buay=calendar.monthrange(yıl,ay) #ayın 1'i haftanın hangi günü ve ayın kaç gün olduğunu döndüren işlev
 aysözlük={i+1:0 for i in range(buay[1])} #programın sonunda günlere üye tutacak üye adlarının yazacağı takvim.
 #aysöz2={günindeks[calendar.monthcalendar(yıl,ay)[0].index(1)]}
 nöbetgünleri=("PSÇ","Pe","Cu","Ct","Pa") #gün kümelerinin demeti. aynı öneme sahip olan pazartesi salı çarşamba günleri aynı kümeye alındı.
@@ -205,7 +204,7 @@ def okuveyaz(çlşDiz=çlşDiz):
 
 def deneme():
  çıktı=""
- okuveyaz()
+ okuveyaz(çlşDiz="D:\Eczane\SİNAN\denemeler\nöbet listeleri")
  çalıştır()
  VT.ek=1
  çalıştır()
@@ -220,11 +219,11 @@ def GUI():
  ek=VT.ek
  global ay
  global yıl
- global nöbLisDiz
+ global çlşDiz
  value=""
  
  
- layout = [  [sg.Text('Önceki nöbet listelerinin olduğu dizin:'),sg.Input(),sg.FolderBrowse(key="nöbLisDiz",tooltip="Klasör seçme penceresi açılır",button_text="Klasör Aç")],
+ layout = [  [sg.Text('Önceki nöbet listelerinin olduğu dizin:'),sg.Input(),sg.FolderBrowse(key="çlşDiz",tooltip="Klasör seçme penceresi açılır",button_text="Klasör Aç")],
              [sg.InputText(key="yıl",default_text=str(yıl),),sg.InputText(key="ay",default_text=str(ay))], 
              [sg.Text(str(aralık)+' gün aralıkla nöbet verilir')], 
              [sg.Text('Verilebilecek ek nöbet sayısı: '+str(ek))],
@@ -249,10 +248,34 @@ def GUI():
   if event=="Yarat": deneme()
   ay=value["ay"]
   yıl=value["yıl"]
-  nöbLisDiz=value["nöbLisDiz"]
+  çlşDiz=value["çlşDiz"]
   window["çıktı"].update(çıktı)
   window["sonuç"].update(çıktı["Sonuç"])
   
 
  return event, window.close()
 
+
+def xlyaz(ay=ay,yıl=yıl,sz=aysözlük,ünvan="Ecz."):
+
+ style0 = xlwt.easyxf('font: name Times New Roman, color-index red, bold on', num_format_str='#,##0.00')
+ style1 = xlwt.easyxf(num_format_str='D-MM-YY')
+ 
+ wb = xlwt.Workbook()
+ ws = wb.add_sheet(str(ay)+str(yıl))
+ 
+ header=("Tarih","Gün","Ünvan","Nöbetçi Adı","Yardımcı Personel")
+ def satırOluştur(ws,satırNo,liste,):
+  for n,girdi in enumerate(liste): ws.write(satırNo,n,girdi)
+  
+ 
+ for g in sz:
+  satırOluştur(ws,g,(calendar.day_name[calendar.datetime.date(yıl,ay,g).weekday()],ünvan,sz[g],))
+
+ #ws.write(0, 0, 1234.56, style0)
+ #ws.write(1, 0, datetime.now(), style1)
+ #ws.write(2, 0, 1)
+ #ws.write(2, 1, 1)
+ #ws.write(2, 2, xlwt.Formula("A3+B3"))
+ 
+ wb.save(str(ay)+'.'+str(yıl)+".xls") 
