@@ -267,13 +267,23 @@ def xlyaz(ay=ay,yıl=yıl,sz=aysözlük,ünvan="Ecz."):
  ws = wb.add_sheet(str(ay)+str(yıl))
  
  başlık=("Tarih","Gün","Ünvan","Nöbetçi Adı","Yardımcı Personel")
+ def sütunOluştur(ws,sütunNo,liste,stil):
+  for n,girdi in enumerate(liste):
+   ws.write(sütunNo,n,girdi,stil)
+
+ #sütunOluştur(ws,0,sz,style1)
+ #sütunOluştur(ws,0,sz,style1)
  
+ #sütunOluştur(ws,0,sz.values(),style1)
+ günAdı={0:"Pazartesi",1:"Salı",2:"Çarşamba",3:"Perşembe",4:"Cuma",5:"Cumartesi",6:"Pazar"}
+  
  def satırOluştur(ws,satırNo,liste,):
-  for n,girdi in enumerate(liste): ws.write(satırNo,n,girdi)
+  for n,girdi in enumerate(liste):
+   ws.write(satırNo,n,girdi)
   
  satırOluştur(ws,0,başlık)
  for g in sz:
-  satırOluştur(ws,g,(calendar.datetime.date(yıl,ay,g),calendar.day_name[calendar.datetime.date(yıl,ay,g).weekday()],ünvan,sz[g],))
+  satırOluştur(ws,g,(calendar.datetime.date(yıl,ay,g),günAdı[calendar.datetime.date(yıl,ay,g).weekday()],ünvan,sz[g],))
 
  #ws.write(0, 0, 1234.56, style0)
  #ws.write(1, 0, datetime.now(), style1)
