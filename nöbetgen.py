@@ -204,7 +204,7 @@ def okuveyaz(çlşDiz=çlşDiz):
 
 def deneme():
  çıktı=""
- okuveyaz(çlşDiz="")
+ okuveyaz(çlşDiz="D:\Eczane\SİNAN\denemeler\nöbet listeleri")
  çalıştır()
  VT.ek=1
  çalıştır()
@@ -275,7 +275,7 @@ def xlyaz(ay=ay,yıl=yıl,sz=aysözlük,ünvan="Ecz."):
  #sütunOluştur(ws,0,sz,style1)
  
  #sütunOluştur(ws,0,sz.values(),style1)
- günAdı={0:"Pazartesi",1:"Salı",2:"Çarşamba",3:"Perşembe",4:"Cuma",5:"Cumartesi",6:"Pazar"}
+ __günAdı={0:"Pazartesi",1:"Salı",2:"Çarşamba",3:"Perşembe",4:"Cuma",5:"Cumartesi",6:"Pazar"}
   
  def satırOluştur(ws,satırNo,liste,):
   for n,girdi in enumerate(liste):
@@ -283,7 +283,7 @@ def xlyaz(ay=ay,yıl=yıl,sz=aysözlük,ünvan="Ecz."):
   
  satırOluştur(ws,0,başlık)
  for g in sz:
-  satırOluştur(ws,g,(calendar.datetime.date(yıl,ay,g),günAdı[calendar.datetime.date(yıl,ay,g).weekday()],ünvan,sz[g],))
+  satırOluştur(ws,g,(calendar.datetime.date(yıl,ay,g),__günAdı[calendar.datetime.date(yıl,ay,g).weekday()],ünvan,sz[g],))
 
  #ws.write(0, 0, 1234.56, style0)
  #ws.write(1, 0, datetime.now(), style1)
