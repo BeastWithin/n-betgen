@@ -7,21 +7,39 @@ import calendar,random,xlwt,xlrd,os
 
 çlşDiz=""
 yıl,ay=2020,6 #hangi tarih için nöbet hazırlanaca
-üyeler={ # üyeler ve mazeret günlerini içeren dict
-         'ELİF ÖZCAN':{},
-         'YÜKSEL AKGÜNEŞ':{},
-         'BEDİRHAN SÜZEN':{},
-         'SİNAN CENGİZ':{1,2,3,4,5,6,7,8,9,10},
-         'ŞERİFE ÖZSU':{},
-         'DEMET HALLAÇ':{},
-         'ÖZGEN BAKTIR KARADAŞ':{},
-         'PINAR EKMEKÇİOĞLU':{},
-         }
+
 buay=calendar.monthrange(yıl,ay) #ayın 1'i haftanın hangi günü ve ayın kaç gün olduğunu döndüren işlev
 aysözlük={i+1:0 for i in range(buay[1])} #programın sonunda günlere üye tutacak üye adlarının yazacağı takvim.
 nöbetgünleri=("PSÇ","Pe","Cu","Ct","Pa") #gün kümelerinin demeti. aynı öneme sahip olan pazartesi salı çarşamba günleri aynı kümeye alındı.
 
+üyeler={ # üyeler ve mazeret günlerini içeren dict
+         'ELİF ÖZCAN':{},
+         'YÜKSEL AKGÜNEŞ':{},
+         'BEDİRHAN SÜZEN':{},
+         'SİNAN CENGİZ':{},
+         'ŞERİFE ÖZSU':{},
+         'DEMET HALLAÇ':{},
+         'ÖZGEN BAKTIR KARADAŞ':{},
+         'PINAR CENGİZ':{},
+         }
+üyeÖzellikleri= {"Mazeret Günü", "Nöbete Başlama Tarihi"}
+üyeler={k:{v:{} for v in üyeÖzellikleri} for k in üyeler } 
 
+class üye:
+ üyeler={ # üyeler ve mazeret günlerini içeren dict
+          'ELİF ÖZCAN':{},
+          'YÜKSEL AKGÜNEŞ':{},
+          'BEDİRHAN SÜZEN':{},
+          'SİNAN CENGİZ':{},
+          'ŞERİFE ÖZSU':{},
+          'DEMET HALLAÇ':{},
+          'ÖZGEN BAKTIR KARADAŞ':{},
+          'PINAR CENGİZ':{},
+          }
+ _üyeÖzellikleri= {"Mazeret Günü", "Nöbete Başlama Tarihi"}
+ üyeler={k:{v:{} for v in üyeÖzellikleri} for k in üyeler } 
+ def __init__():
+  pass
 
 
 def büyükHarfli(ad):
@@ -49,17 +67,7 @@ class VT:
  
 
 
-#for i in üyeler: #mazeretgün den get error vermemesi için eksik üyeler eklemek
- #if i not in mazeretgün:
-  #mazeretgün[i]=[]
-  
-#üyedengüne={i:{i:0 for i in nöbetgünleri} for i in mazeretgün}
-#gündenüyeye={i:{i:0 for i in mazeretgün} for i in nöbetgünleri}
-#db={"sinan":{"PSÇ":45,"Pe":35,"Cu":48,"Ct":56,"Pa":32},
-    #"pınar":{"PSÇ":31,"Pe":41,"Cu":41,"Ct":46,"Pa":33},
-    #"demet":{"PSÇ":15,"Pe":35,"Cu":44,"Ct":51,"Pa":38},
-    #"gürkan":{"PSÇ":15,"Pe":35,"Cu":44,"Ct":51,"Pa":38},
-    #}
+
 günindeks={0:"PSÇ",1:"PSÇ",2:"PSÇ",3:"Pe",4:"Cu",5:"Ct",6:"Pa"}
 
 
@@ -69,7 +77,7 @@ class günlerinsayısı: #belirtilmiş mazeret günleri çıkarıldığında kal
   self.ay=int(ay)
   self.yıl=int(yıl)
   self.kişi=kişi
-  self.üyeler=üyeler.get(kişi)
+  self.mazeretGünü=üyeler[kişi]["Mazeret Günü"]
   self.sözlük={günküme:[] for günküme in nöbetgünleri}
   self.yürüt()
  def sözlük(self):
@@ -77,17 +85,17 @@ class günlerinsayısı: #belirtilmiş mazeret günleri çıkarıldığında kal
  def yürüt(self):
   for gün in aysözlük:
    if aysözlük[gün]==False:
-    if gün not in self.üyeler:
+    if gün not in self.mazeretGünü:
      hg=aydakigünkümesi(gün)
      self.sözlük[hg].append(gün)
      
-def EnAzGünKümesiniBulma():
- enaz=min([i for a in db for i in db[a].values()]) #üyelerin içinde en az değeri olan gün kümesini bulur
- for üye in db:#en az değeri olan kümenin sahibi üyeyi ve kümeyi bulmak için, üyeleri sıralar
-   for gün in db[üye]: #üyelerin günlerini sırala
-    if db[üye][gün]==enaz: #ilgili gün kümesini bulur
-     sayı=db[üye].pop(gün) #ilgili üyenin ilgili gün kümesini "sayı" ya kaydedip siler
-     return [üye,gün,sayı]
+#def EnAzGünKümesiniBulma():
+ #enaz=min([i for a in db for i in db[a].values()]) #üyelerin içinde en az değeri olan gün kümesini bulur
+ #for üye in db:#en az değeri olan kümenin sahibi üyeyi ve kümeyi bulmak için, üyeleri sıralar
+   #for gün in db[üye]: #üyelerin günlerini sırala
+    #if db[üye][gün]==enaz: #ilgili gün kümesini bulur
+     #sayı=db[üye].pop(gün) #ilgili üyenin ilgili gün kümesini "sayı" ya kaydedip siler
+     #return [üye,gün,sayı]
 
 
 
@@ -127,7 +135,7 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
   def nöbetalmasayısıkontrol():#üyenin ay içindeki nöbet sayısı, aydaki gün sayısının üye sayısına bölümüne eşit mi?
    return int(len(aysözlük)/len(üyeler))+ek==[i for i in aysözlük.values()].count(üye) 
   
-  if gün in üyeler.get(üye): #üye için mazeret günü mü?
+  if gün in üyeler[üye]["Mazeret Günü"]: #üye için mazeret günü mü?
    çıktı[ç]+=str(gün)+". gün için, "+str(üye)+" nin mazeret günü\n"
    return False
   elif nöbetalmasayısıkontrol():
@@ -164,12 +172,14 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
    
 
 def rastgeleİşle():#ay içinden rastgele seçip işleyen
+ 
  çıktı=""
  liste=[i for i in aysözlük if not aysözlük[i]] #üye atanmamış günleri süzmek için
  while liste:
   i=random.choice(liste)
   işle(gün=i,)
   liste.remove(i)
+ 
  for a in üyeler:
   çıktı+=a+" "+str([i for i in aysözlük.values()].count(a))+"\n"
  çıktı+="Boş günlerin sayısı"+" "+str([i for i in aysözlük.values()].count(0))+"\n"
