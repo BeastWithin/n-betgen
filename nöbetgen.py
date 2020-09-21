@@ -234,20 +234,37 @@ def GUI():
  global çlşDiz
  value=""
  
+ ekle=""
+ sil=""
  
+ 
+ tab1= [[sg.Multiline(size=(30,20),key="çıktı",autoscroll=True)]]
+ tab2= [[sg.Multiline(size=(30,20),key="sonuç",autoscroll=True)]]
+ tab3= [[sg.Multiline(size=(30,20),key="eşleşmeyen",autoscroll=True)]]
+ 
+ def üyeTablosu(üyeler,çerçevebaşlığı):#
+  üyetablosu=""
+  for üye in üyeler:
+   a="[sg.T('{}'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='{}',default_text='{}')],".format(üye,üye,üyeler[üye])
+   üyetablosu+=a
+  üyetablosu="[sg.Frame('{}', {} )]".format(çerçevebaşlığı,üyetablosu) 
+  return üyetablosu 
+ üyetablosu=exec(üyeTablosu(üyeler,"Üyeler ve Mazeret GÜnleri"))
+  
  layout = [  [sg.Text('Önceki nöbet listelerinin olduğu dizin:'),sg.Input(),sg.FolderBrowse(key="çlşDiz",tooltip="Klasör seçme penceresi açılır",button_text="Klasör Aç")],
              [sg.InputText(key="yıl",default_text=str(yıl),),sg.InputText(key="ay",default_text=str(ay))], 
              [sg.Text(str(aralık)+' gün aralıkla nöbet verilir')], 
              [sg.Text('Verilebilecek ek nöbet sayısı: '+str(ek))],
              [sg.Text("Üyeler:"),sg.Listbox(üyeler,size=(20,5)),sg.Button(button_text="sil")],
              [sg.Button("Yarat"), sg.Cancel()],
-             [sg.Multiline(size=(30,20),key="çıktı",autoscroll=True), sg.Multiline(size=(30,20),key="sonuç",autoscroll=True),sg.Multiline(size=(30,20),key="eşleşmeyen",autoscroll=True)]
+             [sg.TabGroup([[ sg.Tab('ÇIKTI', tab1), sg.Tab('SONUÇ', tab2), sg.Tab('EŞLEŞMEYEN', tab3) ]])],
+             [[sg.T('ELİF ÖZCAN'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='ELİF ÖZCAN',default_text='{}')],[sg.T('YÜKSEL AKGÜNEŞ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='YÜKSEL AKGÜNEŞ',default_text='{}')],[sg.T('BEDİRHAN SÜZEN'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='BEDİRHAN SÜZEN',default_text='{}')],[sg.T('SİNAN CENGİZ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='SİNAN CENGİZ',default_text='{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}')],[sg.T('ŞERİFE ÖZSU'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='ŞERİFE ÖZSU',default_text='{}')],[sg.T('DEMET HALLAÇ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='DEMET HALLAÇ',default_text='{}')],[sg.T('ÖZGEN BAKTIR KARADAŞ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='ÖZGEN BAKTIR KARADAŞ',default_text='{}')],[sg.T('PINAR EKMEKÇİOĞLU'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='PINAR EKMEKÇİOĞLU',default_text='{}')]
+],
+#             [sg.T("üyeadı"),sg.Btn("ekle",ekle),sg.Btn("sil",sil),sg.I(key="",default_text="")],
              ]
- def tabloGUI(başlık=("başlık_1","başlık_2"),satırsayısı=10,tabloadı="tbl"): #tablo GUIsi
-  başlık =  [[sg.Text('  ')] + [sg.Text(h, size=(14,1)) for h in başlık]]
-  satırlar = [[sg.Input(key=tabloadı+str(stn)+str(satır),size=(15,1), pad=(0,0)) for stn in range(len(başlık))] for satır in range(satırsayısı)]
-  tablo = başlık+satırlar
-  return tablo
+
+
+ 
  
  
  # Create the Window
@@ -307,3 +324,14 @@ def xlyaz(ay=ay,yıl=yıl,sz=aysözlük,ünvan="Ecz."):
  ws.col(0).set_style(date_format)
  
  wb.save(str(ay)+'.'+str(yıl)+".xls") 
+ekle=""
+sil=""
+def üyeTablosu(üyeler,çerçevebaşlığı):#
+ üyetablosu=""
+ for üye in üyeler:
+  a="[sg.T('{}'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='{}',default_text='{}')],".format(üye,üye,üyeler[üye])
+  üyetablosu+=a
+ üyetablosu="[sg.Frame('{}', {}  )]".format(çerçevebaşlığı,üyetablosu) 
+ return üyetablosu 
+#üyetablosu=exec(üyeTablosu(üyeler,"Üyeler ve Mazeret GÜnleri"))
+[sg.T('ELİF ÖZCAN'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='ELİF ÖZCAN',default_text='{}')],[sg.T('YÜKSEL AKGÜNEŞ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='YÜKSEL AKGÜNEŞ',default_text='{}')],[sg.T('BEDİRHAN SÜZEN'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='BEDİRHAN SÜZEN',default_text='{}')],[sg.T('SİNAN CENGİZ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='SİNAN CENGİZ',default_text='{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}')],[sg.T('ŞERİFE ÖZSU'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='ŞERİFE ÖZSU',default_text='{}')],[sg.T('DEMET HALLAÇ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='DEMET HALLAÇ',default_text='{}')],[sg.T('ÖZGEN BAKTIR KARADAŞ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='ÖZGEN BAKTIR KARADAŞ',default_text='{}')],[sg.T('PINAR EKMEKÇİOĞLU'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='PINAR EKMEKÇİOĞLU',default_text='{}')]
