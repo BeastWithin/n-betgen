@@ -238,9 +238,7 @@ def GUI():
  sil=""
  
  
- tab1= [[sg.Multiline(size=(30,20),key="çıktı",autoscroll=True)]]
- tab2= [[sg.Multiline(size=(30,20),key="sonuç",autoscroll=True)]]
- tab3= [[sg.Multiline(size=(30,20),key="eşleşmeyen",autoscroll=True)]]
+
  
  def üyeTablosu(üyeler,çerçevebaşlığı):#
   üyetablosu=""
@@ -257,7 +255,7 @@ def GUI():
   [sg.InputText(key="aralık",default_text=str(aralık), size=(1,4),), sg.T(' gün aralıkla nöbet verilir')], 
   [sg.Text('Verilebilecek ek nöbet sayısı: '), sg.InputText(key="ek",default_text=str(ek), size=(1,4),)],
   [sg.Text("Üyeler:"),sg.Listbox(üyeler,size=(20,5)),sg.Button(button_text="sil")],
-  [sg.Button("Yarat"), sg.Cancel()]
+  [sg.Button("Tabloları Tara"), sg.Button("Yarat"), sg.Cancel()],
   ]
  
  üyelersekme= [
@@ -271,10 +269,24 @@ def GUI():
   [sg.T('PINAR EKMEKÇİOĞLU'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='PINAR EKMEKÇİOĞLU',default_text='{}')],
   ]
   
- layout = [
-  [sg.TabGroup([[ sg.Tab('AYARLAR', ayarlarsekme), sg.Tab('ÜYELER', üyelersekme), sg.Tab('ÇIKTI', tab1), sg.Tab('SONUÇ', tab2), sg.Tab('EŞLEŞMEYEN', tab3) ]])],
- ]
-#             [sg.T("üyeadı"),sg.Btn("ekle",ekle),sg.Btn("sil",sil),sg.I(key="",default_text="")],
+ işlenentablolartab= [[sg.Multiline(size=(30,20),key="işlenentablo",autoscroll=True)]]
+ çıktıtab= [[sg.Multiline(size=(30,20),key="çıktı",autoscroll=True)]]
+ sonuçtab= [[sg.Multiline(size=(30,20),key="sonuç",autoscroll=True)]]
+ eşleşmeyentab= [[sg.Multiline(size=(30,20),key="eşleşmeyen",autoscroll=True)]] 
+ 
+ layout = [[
+  sg.TabGroup(
+   [[
+   sg.Tab('AYARLAR', ayarlarsekme), 
+   sg.Tab('ÜYELER', üyelersekme),
+   sg.Tab('İŞLENEN TABLOLAR', işlenentablolartab),
+   sg.Tab('ÇIKTI', çıktıtab), 
+   sg.Tab('SONUÇ', sonuçtab), 
+   sg.Tab('EŞLEŞMEYEN', eşleşmeyentab),
+   ]]
+ )
+ ]]
+ 
 
 
 
@@ -289,6 +301,7 @@ def GUI():
   if event in (None, 'Cancel'):
    break
   if event=="Yarat": çalıştır()
+  if event=="Tabloları Tara":  okuveyaz()
   ay=value["ay"]
   yıl=value["yıl"]
   aralık=value["aralık"]
@@ -297,6 +310,7 @@ def GUI():
   window["çıktı"].update(VT.çıktı)
   window["sonuç"].update(VT.çıktı["Sonuç"])
   window["eşleşmeyen"].update(VT.eşleşmeyenÜye)
+  window["işlenentablo"].update(VT.işlenenXLS)
 
   
 
