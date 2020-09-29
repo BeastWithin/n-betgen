@@ -5,7 +5,7 @@ import calendar,random,xlwt,xlrd,os
 import PySimpleGUI as sg
 
 
-çlşDiz=""
+çlşDiz=os.getcwd()
 yıl,ay=2020,6 #hangi tarih için nöbet hazırlanaca
 üyeler={ # üyeler ve mazeret günlerini içeren dict
          'ELİF ÖZCAN':{},
@@ -20,7 +20,8 @@ yıl,ay=2020,6 #hangi tarih için nöbet hazırlanaca
 buay=calendar.monthrange(yıl,ay) #ayın 1'i haftanın hangi günü ve ayın kaç gün olduğunu döndüren işlev
 aysözlük={i+1:0 for i in range(buay[1])} #programın sonunda günlere üye tutacak üye adlarının yazacağı takvim.
 nöbetgünleri=("PSÇ","Pe","Cu","Ct","Pa") #gün kümelerinin demeti. aynı öneme sahip olan pazartesi salı çarşamba günleri aynı kümeye alındı.
-
+günindeks={0:"PSÇ",1:"PSÇ",2:"PSÇ",3:"Pe",4:"Cu",5:"Ct",6:"Pa"}
+dizindekiXLSler=[dosya for dosya in os.listdir(os.getcwd()) if ".xls" in dosya if "~" not in dosya]
 
 
 
@@ -60,7 +61,6 @@ class VT:
     #"demet":{"PSÇ":15,"Pe":35,"Cu":44,"Ct":51,"Pa":38},
     #"gürkan":{"PSÇ":15,"Pe":35,"Cu":44,"Ct":51,"Pa":38},
     #}
-günindeks={0:"PSÇ",1:"PSÇ",2:"PSÇ",3:"Pe",4:"Cu",5:"Ct",6:"Pa"}
 
 
 
@@ -179,10 +179,14 @@ def rastgeleİşle():#ay içinden rastgele seçip işleyen
 def okuveyaz(çlşDiz=çlşDiz):
  #global db # daha sonra global kaldırıacak class kullanılacak
  VT.db={üye:{gk:0 for gk in günindeks.values()} for üye in üyeler}
- if not çlşDiz: çlşDiz=os.getcwd()
- for dosya in os.listdir(): #programın bulunduğu dizindeki dosyaların lisetelenmesi
-  if ".xls" in dosya: #xls lerin süzülmesi
-   if "~" not in dosya:# gizli kurtarma dosyalarını almasın diye
+ if çlşDiz:
+  os.chdir(çlşDiz)
+ else:
+  çlşDiz=os.getcwd()
+  for dosya in dizindekiXLSler:
+ #for dosya in os.listdir(): #programın bulunduğu dizindeki dosyaların lisetelenmesi
+  #if ".xls" in dosya: #xls lerin süzülmesi
+   #if "~" not in dosya:# gizli kurtarma dosyalarını almasın diye
     açılanXLS = xlrd.open_workbook(os.path.join(çlşDiz,dosya))
     açılanXLS = açılanXLS.sheet_by_index(0) # xls deki ilk sayfaya odaklanmak
     VT.işlenenXLS.add(dosya) #hangi xls lerin işlendiğine sonra bakabilmek için    
@@ -250,12 +254,11 @@ def GUI():
  #üyetablosu=exec(üyeTablosu(üyeler,"Üyeler ve Mazeret Günleri"))
   
  ayarlarsekme=[
-  [sg.Text('Önceki nöbet listelerinin olduğu dizin:'),sg.Input(),sg.FolderBrowse(key="çlşDiz",tooltip="Klasör seçme penceresi açılır",button_text="Klasör Aç")],
+  [sg.Text('Önceki nöbet listelerinin olduğu dizin:'),sg.Input(default_text=çlşDiz),sg.FolderBrowse(key="çlşDiz",tooltip="Klasör seçme penceresi açılır",button_text="Klasör Aç")],
   [sg.InputText(key="yıl",default_text=str(yıl), size=(4,4),), sg.T(" yılı "), sg.InputText(key="ay",default_text=str(ay), size=(2,4),), sg.T(" ayı için nöbet oluşturulacak."),], 
   [sg.InputText(key="aralık",default_text=str(aralık), size=(1,4),), sg.T(' gün aralıkla nöbet verilir')], 
   [sg.Text('Verilebilecek ek nöbet sayısı: '), sg.InputText(key="ek",default_text=str(ek), size=(1,4),)],
   [sg.Text("Üyeler:"),sg.Listbox(üyeler,size=(20,5)),sg.Button(button_text="sil")],
-  [sg.Button("Tabloları Tara"), sg.Button("Yarat"), sg.Cancel()],
   ]
  
  üyelersekme= [
@@ -273,9 +276,7 @@ def GUI():
  çıktıtab= [[sg.Multiline(size=(30,20),key="çıktı",autoscroll=True)]]
  sonuçtab= [[sg.Multiline(size=(30,20),key="sonuç",autoscroll=True)]]
  eşleşmeyentab= [[sg.Multiline(size=(30,20),key="eşleşmeyen",autoscroll=True)]] 
- 
- layout = [[
-  sg.TabGroup(
+ sekmegurubu=[sg.TabGroup(
    [[
    sg.Tab('AYARLAR', ayarlarsekme), 
    sg.Tab('ÜYELER', üyelersekme),
@@ -284,8 +285,10 @@ def GUI():
    sg.Tab('SONUÇ', sonuçtab), 
    sg.Tab('EŞLEŞMEYEN', eşleşmeyentab),
    ]]
- )
- ]]
+ )]
+ eylembutonları=[sg.Button("Tabloları Tara"), sg.Button("Yarat"), sg.Button("Çıkış")]
+
+ layout = [sekmegurubu,eylembutonları]
  
 
 
@@ -298,7 +301,7 @@ def GUI():
  # Event Loop to process "events"
  while True:
   event, value = window.read()
-  if event in (None, 'Cancel'):
+  if event in (None, 'Çıkış'):
    break
   if event=="Yarat": çalıştır()
   if event=="Tabloları Tara":  okuveyaz()
@@ -311,7 +314,6 @@ def GUI():
   window["sonuç"].update(VT.çıktı["Sonuç"])
   window["eşleşmeyen"].update(VT.eşleşmeyenÜye)
   window["işlenentablo"].update(VT.işlenenXLS)
-
   
 
  return event, window.close()
@@ -353,7 +355,7 @@ def xlyaz(ay=ay,yıl=yıl,sz=aysözlük,ünvan="Ecz."):
  #ws.write(2, 2, xlwt.Formula("A3+B3"))
  ws.col(0).set_style(date_format)
  
- wb.save(str(ay)+'.'+str(yıl)+".xls") 
+ wb.save(str(yıl)[:1:-1]+str(ay)+".xls") 
 ekle=""
 sil=""
 def üyeTablosu(üyeler,çerçevebaşlığı):#
@@ -364,3 +366,4 @@ def üyeTablosu(üyeler,çerçevebaşlığı):#
  üyetablosu="[sg.Frame('{}', {}  )]".format(çerçevebaşlığı,üyetablosu) 
  return üyetablosu 
 #üyetablosu=exec(üyeTablosu(üyeler,"Üyeler ve Mazeret GÜnleri"))
+
