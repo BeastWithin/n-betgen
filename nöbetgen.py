@@ -6,7 +6,7 @@ import PySimpleGUI as sg
 
 
 çlşDiz=os.getcwd()
-yıl,ay=2020,6 #hangi tarih için nöbet hazırlanaca
+yıl,ay=2020,6 #hangi tarih için nöbet hazırlanacağı
 üyeler={ # üyeler ve mazeret günlerini içeren dict
          'ELİF ÖZCAN':{},
          'YÜKSEL AKGÜNEŞ':{},
@@ -22,7 +22,6 @@ aysözlük={i+1:0 for i in range(buay[1])} #programın sonunda günlere üye tut
 nöbetgünleri=("PSÇ","Pe","Cu","Ct","Pa") #gün kümelerinin demeti. aynı öneme sahip olan pazartesi salı çarşamba günleri aynı kümeye alındı.
 günindeks={0:"PSÇ",1:"PSÇ",2:"PSÇ",3:"Pe",4:"Cu",5:"Ct",6:"Pa"}
 dizindekiXLSler=[dosya for dosya in os.listdir(os.getcwd()) if ".xls" in dosya if "~" not in dosya]
-
 
 
 def büyükHarfli(ad):
@@ -176,52 +175,49 @@ def rastgeleİşle():#ay içinden rastgele seçip işleyen
  VT().çıktıEkle("Üyelere atanan gün sayıları",çıktı)
 
 
-def okuveyaz(çlşDiz=çlşDiz):
- #global db # daha sonra global kaldırıacak class kullanılacak
+class okuveyaz:
  VT.db={üye:{gk:0 for gk in günindeks.values()} for üye in üyeler}
  if çlşDiz:
   os.chdir(çlşDiz)
  else:
   çlşDiz=os.getcwd()
-  for dosya in dizindekiXLSler:
- #for dosya in os.listdir(): #programın bulunduğu dizindeki dosyaların lisetelenmesi
-  #if ".xls" in dosya: #xls lerin süzülmesi
-   #if "~" not in dosya:# gizli kurtarma dosyalarını almasın diye
-    açılanXLS = xlrd.open_workbook(os.path.join(çlşDiz,dosya))
-    açılanXLS = açılanXLS.sheet_by_index(0) # xls deki ilk sayfaya odaklanmak
-    VT.işlenenXLS.add(dosya) #hangi xls lerin işlendiğine sonra bakabilmek için    
-    for satırnumarası in range(açılanXLS.nrows):#ilk satırı atlayarak satırları ele almak
-     if any(açılanXLS.row_values(satırnumarası)): #boş satırları geçmek
-      tarih,üye="",""      
-      for i in açılanXLS.row_values(satırnumarası):
-       if type(i) is float: #liste öğesi tarih mi sorgusu
-        tarih=xlrd.xldate_as_tuple(i,0) #xldate, exceldeki tarih damgasını tarihe çeviriyor.
-        tarih=tarih[2::-1]# tarihin sırasını düzeltme
-       elif type(i) is str: #liste öğesi kişi adı mı sorgusu
-        if i.split().__len__()>1: #"birden fazla kelime ise kişi adıdır" mantığı
-         if not üye: #ilk saptadığı adı alması için
-          üye=büyükHarfli(i) #o tarihe yazılı üyeyi alma
-      if tarih and üye:
-       VT.çekilenVeri[tarih] = üye # xls deki veriyi sözlüğe aktarma
- for i in VT.çekilenVeri: #excellerden çekilen veriyi, üye bazlı sayıp, db sözlüğüne işliyor.
-  işlGünKüm=günindeks[calendar.weekday(i[2],i[1],i[0])] #çekilen tarih verisini günkümesine çevirir
-  işlÜye=VT.çekilenVeri[i] #çekilen üye verisini kayıt etme
-  try:#günümüzde olmayan üyeleri db ye yazarken hata vermesin
-   VT.db[işlÜye][işlGünKüm]+=1 
-   VT.işlenenGünler[i]=işlÜye
-  except:
-   VT.eşleşmeyenGünler[i]=işlÜye
-   VT.eşleşmeyenÜye.add(işlÜye)
-   pass
+ def XLSoku(dosya,çekilenveri):
+  açılanXLS = xlrd.open_workbook(os.path.join(çlşDiz,dosya))
+  açılanXLS = açılanXLS.sheet_by_index(0) # xls deki ilk sayfaya odaklanmak
+  VT.işlenenXLS.add(dosya) #hangi xls lerin işlendiğine sonra bakabilmek için 
+  for satırnumarası in range(açılanXLS.nrows):#ilk satırı atlayarak satırları ele almak
+   if any(açılanXLS.row_values(satırnumarası)): #boş satırları geçmek
+    tarih,üye="",""      
+    for i in açılanXLS.row_values(satırnumarası):
+     if type(i) is float: #liste öğesi tarih mi sorgusu
+      tarih=xlrd.xldate_as_tuple(i,0) #xldate, exceldeki tarih damgasını tarihe çeviriyor.
+      tarih=tarih[2::-1]# tarihin sırasını düzeltme
+     elif type(i) is str: #liste öğesi kişi adı mı sorgusu
+      if i.split().__len__()>1: #"birden fazla kelime ise kişi adıdır" mantığı
+       if not üye: #ilk saptadığı adı alması için
+        üye=büyükHarfli(i) #o tarihe yazılı üyeyi alma
+    if tarih and üye:
+     çekilenveri[tarih] = üye # xls deki veriyi sözlüğe aktarma
+ def vtYaz(çekilenveri):
+  for i in çekilenveri: #excellerden çekilen veriyi, üye bazlı sayıp, db sözlüğüne işliyor.
+   işlGünKüm=günindeks[calendar.weekday(i[2],i[1],i[0])] #çekilen tarih verisini günkümesine çevirir
+   işlÜye=çekilenveri[i] #çekilen üye verisini kayıt etme
+   try:#günümüzde olmayan üyeleri db ye yazarken hata vermesin
+    VT.db[işlÜye][işlGünKüm]+=1 
+    VT.işlenenGünler[i]=işlÜye
+   except:
+    VT.eşleşmeyenGünler[i]=işlÜye
+    VT.eşleşmeyenÜye.add(işlÜye)
+    pass
  
 
 
 
- 
 
 def çalıştır():
  çıktı=""
- okuveyaz(çlşDiz=çlşDiz)
+ for dosya in dizindekiXLSler: okuveyaz.XLSoku(dosya,VT.çekilenVeri)
+ okuveyaz.vtYaz(VT.çekilenVeri)
  rastgeleİşle()
  VT.ek=1
  rastgeleİşle()
@@ -236,12 +232,14 @@ def GUI():
  global ay
  global yıl
  global çlşDiz
+ global üyeler
  value=""
- 
  ekle=""
  sil=""
- 
- 
+ sonüyeler={}
+ okuveyaz.XLSoku(max(dizindekiXLSler),sonüyeler)#son listeyi belirlemek için
+ üyeler={i:{} for i in sonüyeler.values()}#son listedeki üyeleri belirlemek için
+
 
  
  def üyeTablosu(üyeler,çerçevebaşlığı):#
@@ -249,28 +247,27 @@ def GUI():
   for üye in üyeler:
    a="[sg.T('{}'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='{}',default_text='{}')],".format(üye,üye,üyeler[üye])
    üyetablosu+=a
-  üyetablosu="[sg.Frame('{}', {} )]".format(çerçevebaşlığı,üyetablosu) 
-  return üyetablosu 
- #üyetablosu=exec(üyeTablosu(üyeler,"Üyeler ve Mazeret Günleri"))
   
+  return üyetablosu 
+ üyelersekme=eval(üyeTablosu(üyeler,"Üyeler"))
  ayarlarsekme=[
   [sg.Text('Önceki nöbet listelerinin olduğu dizin:'),sg.Input(default_text=çlşDiz),sg.FolderBrowse(key="çlşDiz",tooltip="Klasör seçme penceresi açılır",button_text="Klasör Aç")],
   [sg.InputText(key="yıl",default_text=str(yıl), size=(4,4),), sg.T(" yılı "), sg.InputText(key="ay",default_text=str(ay), size=(2,4),), sg.T(" ayı için nöbet oluşturulacak."),], 
   [sg.InputText(key="aralık",default_text=str(aralık), size=(1,4),), sg.T(' gün aralıkla nöbet verilir')], 
   [sg.Text('Verilebilecek ek nöbet sayısı: '), sg.InputText(key="ek",default_text=str(ek), size=(1,4),)],
-  [sg.Text("Üyeler:"),sg.Listbox(üyeler,size=(20,5)),sg.Button(button_text="sil")],
+  #[sg.Text("Üyeler:"),sg.Listbox(üyeler,size=(20,5)),sg.Button(button_text="sil")],
   ]
  
- üyelersekme= [
-  [sg.T('ELİF ÖZCAN'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='ELİF ÖZCAN',default_text='{}')],
-  [sg.T('YÜKSEL AKGÜNEŞ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='YÜKSEL AKGÜNEŞ',default_text='{}')],
-  [sg.T('BEDİRHAN SÜZEN'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='BEDİRHAN SÜZEN',default_text='{}')],
-  [sg.T('SİNAN CENGİZ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='SİNAN CENGİZ',default_text='{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}')],
-  [sg.T('ŞERİFE ÖZSU'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='ŞERİFE ÖZSU',default_text='{}')],
-  [sg.T('DEMET HALLAÇ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='DEMET HALLAÇ',default_text='{}')],
-  [sg.T('ÖZGEN BAKTIR KARADAŞ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='ÖZGEN BAKTIR KARADAŞ',default_text='{}')],
-  [sg.T('PINAR EKMEKÇİOĞLU'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='PINAR EKMEKÇİOĞLU',default_text='{}')],
-  ]
+ #üyelersekme= [
+  #[sg.T('ELİF ÖZCAN'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='ELİF ÖZCAN',default_text='{}')],
+  #[sg.T('YÜKSEL AKGÜNEŞ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='YÜKSEL AKGÜNEŞ',default_text='{}')],
+  #[sg.T('BEDİRHAN SÜZEN'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='BEDİRHAN SÜZEN',default_text='{}')],
+  #[sg.T('SİNAN CENGİZ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='SİNAN CENGİZ',default_text='{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}')],
+  #[sg.T('ŞERİFE ÖZSU'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='ŞERİFE ÖZSU',default_text='{}')],
+  #[sg.T('DEMET HALLAÇ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='DEMET HALLAÇ',default_text='{}')],
+  #[sg.T('ÖZGEN BAKTIR KARADAŞ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='ÖZGEN BAKTIR KARADAŞ',default_text='{}')],
+  #[sg.T('PINAR EKMEKÇİOĞLU'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='PINAR EKMEKÇİOĞLU',default_text='{}')],
+  #]
   
  işlenentablolartab= [[sg.Multiline(size=(30,20),key="işlenentablo",autoscroll=True)]]
  çıktıtab= [[sg.Multiline(size=(30,20),key="çıktı",autoscroll=True)]]
@@ -314,7 +311,6 @@ def GUI():
   window["sonuç"].update(VT.çıktı["Sonuç"])
   window["eşleşmeyen"].update(VT.eşleşmeyenÜye)
   window["işlenentablo"].update(VT.işlenenXLS)
-  
 
  return event, window.close()
 
@@ -356,14 +352,3 @@ def xlyaz(ay=ay,yıl=yıl,sz=aysözlük,ünvan="Ecz."):
  ws.col(0).set_style(date_format)
  
  wb.save(str(yıl)[:1:-1]+str(ay)+".xls") 
-ekle=""
-sil=""
-def üyeTablosu(üyeler,çerçevebaşlığı):#
- üyetablosu=""
- for üye in üyeler:
-  a="[sg.T('{}'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='{}',default_text='{}')],".format(üye,üye,üyeler[üye])
-  üyetablosu+=a
- üyetablosu="[sg.Frame('{}', {}  )]".format(çerçevebaşlığı,üyetablosu) 
- return üyetablosu 
-#üyetablosu=exec(üyeTablosu(üyeler,"Üyeler ve Mazeret GÜnleri"))
-
