@@ -95,6 +95,7 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
 
  def __init__(self,gün=0, ):
   self.ek=VT.ek
+  
 
   if gün:
    self.günküme=self.aydakigünkümesi(gün)
@@ -125,8 +126,8 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
      return False  
   def nöbetalmasayısıkontrol():#üyenin ay içindeki nöbet sayısı, aydaki gün sayısının üye sayısına bölümüne eşit mi?
    return int(len(aysözlük)/len(üyeler))+ek==[i for i in aysözlük.values()].count(üye) 
-  
-  if gün in üyeler.get(üye): #üye için mazeret günü mü?
+  print(üyeler)
+  if gün in üyeler.get(üye): #üye için mazeret günü mü? MAZERET KONTROL
    çıktı[ç]+=str(gün)+". gün için, "+str(üye)+" nin mazeret günü\n"
    return False
   elif nöbetalmasayısıkontrol():
@@ -148,7 +149,7 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
     break
 
 
-   
+
  def aydakigünkümesi(self,günsırası): #ayın gününün haftanın hangi günü olduğunu getirir. ayın 1'i salı günü gibi.
   return günindeks[calendar.weekday(yıl,ay,günsırası)]   
  
@@ -159,8 +160,6 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
    return "Başarısız"
 
 
-    
-   
 
 def rastgeleİşle():#ay içinden rastgele seçip işleyen
  çıktı=""
@@ -245,8 +244,9 @@ def GUI():
  def üyeTablosu(üyeler,çerçevebaşlığı):#
   üyetablosu=""
   for üye in üyeler:
-   a="[sg.T('{}'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='{}',default_text='{}')],".format(üye,üye,üyeler[üye])
+   a="[sg.Input(key='{}',default_text='{}'),sg.I(key='mazeret{}',default_text='{}'),sg.Btn('sil',sil)],".format(üye,üye,üye,üyeler[üye])
    üyetablosu+=a
+  üyetablosu+="[sg.Btn('ekle',ekle)]"
   
   return üyetablosu 
  üyelersekme=eval(üyeTablosu(üyeler,"Üyeler"))
@@ -257,18 +257,6 @@ def GUI():
   [sg.Text('Verilebilecek ek nöbet sayısı: '), sg.InputText(key="ek",default_text=str(ek), size=(1,4),)],
   #[sg.Text("Üyeler:"),sg.Listbox(üyeler,size=(20,5)),sg.Button(button_text="sil")],
   ]
- 
- #üyelersekme= [
-  #[sg.T('ELİF ÖZCAN'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='ELİF ÖZCAN',default_text='{}')],
-  #[sg.T('YÜKSEL AKGÜNEŞ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='YÜKSEL AKGÜNEŞ',default_text='{}')],
-  #[sg.T('BEDİRHAN SÜZEN'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='BEDİRHAN SÜZEN',default_text='{}')],
-  #[sg.T('SİNAN CENGİZ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='SİNAN CENGİZ',default_text='{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}')],
-  #[sg.T('ŞERİFE ÖZSU'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='ŞERİFE ÖZSU',default_text='{}')],
-  #[sg.T('DEMET HALLAÇ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='DEMET HALLAÇ',default_text='{}')],
-  #[sg.T('ÖZGEN BAKTIR KARADAŞ'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='ÖZGEN BAKTIR KARADAŞ',default_text='{}')],
-  #[sg.T('PINAR EKMEKÇİOĞLU'),sg.Btn('ekle',ekle),sg.Btn('sil',sil),sg.I(key='PINAR EKMEKÇİOĞLU',default_text='{}')],
-  #]
-  
  işlenentablolartab= [[sg.Multiline(size=(30,20),key="işlenentablo",autoscroll=True)]]
  çıktıtab= [[sg.Multiline(size=(30,20),key="çıktı",autoscroll=True)]]
  sonuçtab= [[sg.Multiline(size=(30,20),key="sonuç",autoscroll=True)]]
