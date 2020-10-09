@@ -222,6 +222,7 @@ def çalıştır():
  rastgeleİşle()
  for i in aysözlük: çıktı+=str(i)+" "+str(aysözlük[i])+"\n"
  VT.çıktı["Sonuç"]=çıktı
+ xlyaz()
 
 def GUI():
  sg.theme('DarkAmber')  
@@ -249,6 +250,7 @@ def GUI():
   üyetablosu+="[sg.Btn('ekle',ekle)]"
   
   return üyetablosu 
+ 
  üyelersekme=eval(üyeTablosu(üyeler,"Üyeler"))
  ayarlarsekme=[
   [sg.Text('Önceki nöbet listelerinin olduğu dizin:'),sg.Input(default_text=çlşDiz),sg.FolderBrowse(key="çlşDiz",tooltip="Klasör seçme penceresi açılır",button_text="Klasör Aç")],
@@ -338,5 +340,5 @@ def xlyaz(ay=ay,yıl=yıl,sz=aysözlük,ünvan="Ecz."):
  #ws.write(2, 1, 1)
  #ws.write(2, 2, xlwt.Formula("A3+B3"))
  ws.col(0).set_style(date_format)
- 
- wb.save(str(yıl)[:1:-1]+str(ay)+".xls") 
+ dosyaadı=str(yıl)[2:4]+"{0:0=2d}".format(ay)+".xls"
+ wb.save(dosyaadı) 
