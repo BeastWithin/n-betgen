@@ -175,12 +175,12 @@ def rastgeleİşle():#ay içinden rastgele seçip işleyen
 
 
 class okuveyaz:
- VT.db={üye:{gk:0 for gk in günindeks.values()} for üye in üyeler}
  if çlşDiz:
   os.chdir(çlşDiz)
  else:
   çlşDiz=os.getcwd()
- def XLSoku(dosya,çekilenveri):
+ def XLSoku(VT,dosya):
+  çekilenveri={}
   açılanXLS = xlrd.open_workbook(os.path.join(çlşDiz,dosya))
   açılanXLS = açılanXLS.sheet_by_index(0) # xls deki ilk sayfaya odaklanmak
   VT.işlenenXLS.add(dosya) #hangi xls lerin işlendiğine sonra bakabilmek için 
@@ -197,7 +197,8 @@ class okuveyaz:
         üye=büyükHarfli(i) #o tarihe yazılı üyeyi alma
     if tarih and üye:
      çekilenveri[tarih] = üye # xls deki veriyi sözlüğe aktarma
- def vtYaz(çekilenveri):
+  return çekilenveri
+ def vtYaz(VT,çekilenveri):
   for i in çekilenveri: #excellerden çekilen veriyi, üye bazlı sayıp, db sözlüğüne işliyor.
    işlGünKüm=günindeks[calendar.weekday(i[2],i[1],i[0])] #çekilen tarih verisini günkümesine çevirir
    işlÜye=çekilenveri[i] #çekilen üye verisini kayıt etme
@@ -214,9 +215,10 @@ class okuveyaz:
 
 
 def çalıştır():
+ VT.db={üye:{gk:0 for gk in günindeks.values()} for üye in üyeler} 
  çıktı=""
- for dosya in dizindekiXLSler: okuveyaz.XLSoku(dosya,VT.çekilenVeri)
- okuveyaz.vtYaz(VT.çekilenVeri)
+ for dosya in dizindekiXLSler: VT.çekilenVeri.update(okuveyaz.XLSoku(VT,dosya)) # geçmiş tarih-nöbetçi bilgisini dizindeki XLS lerden VT.çekilenVeri ye kaydeder
+ okuveyaz.vtYaz(VT,VT.çekilenVeri)
  rastgeleİşle()
  VT.ek=1
  rastgeleİşle()
@@ -224,98 +226,22 @@ def çalıştır():
  VT.çıktı["Sonuç"]=çıktı
  xlyaz()
 
-def GUI():
- sg.theme('DarkAmber')  
- aralık=VT.aralık
- çıktı=VT.çıktı
- ek=VT.ek
- global ay
- global yıl
- global çlşDiz
- global üyeler
- value=""
- ekle=""
- sil=""
- sonüyeler={}
- okuveyaz.XLSoku(max(dizindekiXLSler),sonüyeler)#son listeyi belirlemek için
- üyeler={i:{} for i in sonüyeler.values()}#son listedeki üyeleri belirlemek için
 
-
- 
- def üyeTablosu(üyeler,çerçevebaşlığı):#
-  üyetablosu=""
-  for üye in üyeler:
-   a="[sg.Input(key='{}',default_text='{}'),sg.I(key='mazeret{}',default_text='{}'),sg.Btn('sil',sil)],".format(üye,üye,üye,üyeler[üye])
-   üyetablosu+=a
-  üyetablosu+="[sg.Btn('ekle',ekle)]"
-  
-  return üyetablosu 
- 
- üyelersekme=eval(üyeTablosu(üyeler,"Üyeler"))
- ayarlarsekme=[
-  [sg.Text('Önceki nöbet listelerinin olduğu dizin:'),sg.Input(default_text=çlşDiz),sg.FolderBrowse(key="çlşDiz",tooltip="Klasör seçme penceresi açılır",button_text="Klasör Aç")],
-  [sg.InputText(key="yıl",default_text=str(yıl), size=(4,4),), sg.T(" yılı "), sg.InputText(key="ay",default_text=str(ay), size=(2,4),), sg.T(" ayı için nöbet oluşturulacak."),], 
-  [sg.InputText(key="aralık",default_text=str(aralık), size=(1,4),), sg.T(' gün aralıkla nöbet verilir')], 
-  [sg.Text('Verilebilecek ek nöbet sayısı: '), sg.InputText(key="ek",default_text=str(ek), size=(1,4),)],
-  #[sg.Text("Üyeler:"),sg.Listbox(üyeler,size=(20,5)),sg.Button(button_text="sil")],
-  ]
- işlenentablolartab= [[sg.Multiline(size=(30,20),key="işlenentablo",autoscroll=True)]]
- çıktıtab= [[sg.Multiline(size=(30,20),key="çıktı",autoscroll=True)]]
- sonuçtab= [[sg.Multiline(size=(30,20),key="sonuç",autoscroll=True)]]
- eşleşmeyentab= [[sg.Multiline(size=(30,20),key="eşleşmeyen",autoscroll=True)]] 
- sekmegurubu=[sg.TabGroup(
-   [[
-   sg.Tab('AYARLAR', ayarlarsekme), 
-   sg.Tab('ÜYELER', üyelersekme),
-   sg.Tab('İŞLENEN TABLOLAR', işlenentablolartab),
-   sg.Tab('ÇIKTI', çıktıtab), 
-   sg.Tab('SONUÇ', sonuçtab), 
-   sg.Tab('EŞLEŞMEYEN', eşleşmeyentab),
-   ]]
- )]
- eylembutonları=[sg.Button("Tabloları Tara"), sg.Button("Yarat"), sg.Button("Çıkış")]
-
- layout = [sekmegurubu,eylembutonları]
- 
-
-
-
- 
- 
- 
- # Create the Window
- window = sg.Window('NöbetGen', layout)
- # Event Loop to process "events"
- while True:
-  event, value = window.read()
-  if event in (None, 'Çıkış'):
-   break
-  if event=="Yarat": çalıştır()
-  if event=="Tabloları Tara":  okuveyaz()
-  ay=value["ay"]
-  yıl=value["yıl"]
-  aralık=value["aralık"]
-  ek=value["ek"]
-  çlşDiz=value["çlşDiz"]
-  window["çıktı"].update(VT.çıktı)
-  window["sonuç"].update(VT.çıktı["Sonuç"])
-  window["eşleşmeyen"].update(VT.eşleşmeyenÜye)
-  window["işlenentablo"].update(VT.işlenenXLS)
-
- return event, window.close()
-
-
-def xlyaz(ay=ay,yıl=yıl,sz=aysözlük,ünvan="Ecz."):
+def xlyaz(ay=ay,
+          yıl=yıl,
+          sz=aysözlük,
+          ünvan="Ecz.",
+          başlık=("Tarih","Gün","Ünvan","Nöbetçi Adı","Yardımcı Personel"),
+          ):
 
  style0 = xlwt.easyxf('font: name Times New Roman, color-index red, bold on', num_format_str='#,##0.00')
  style1 = xlwt.easyxf(num_format_str="dd/mm/yyyy")
  date_format = xlwt.XFStyle()
- date_format.num_format_str = 'dd/mm/yyyy'
+ date_format.num_format_str = 'dd/mm/yyyy'  #ÇALIŞMIYOR bakılacak
  
  wb = xlwt.Workbook()
  ws = wb.add_sheet(str(ay)+str(yıl))
  
- başlık=("Tarih","Gün","Ünvan","Nöbetçi Adı","Yardımcı Personel")
  def sütunOluştur(ws,sütunNo,liste,stil):
   for n,girdi in enumerate(liste):
    ws.write(sütunNo,n,girdi,stil)
@@ -342,3 +268,133 @@ def xlyaz(ay=ay,yıl=yıl,sz=aysözlük,ünvan="Ecz."):
  ws.col(0).set_style(date_format)
  dosyaadı=str(yıl)[2:4]+"{0:0=2d}".format(ay)+".xls"
  wb.save(dosyaadı) 
+ 
+class XLSyaz:
+ """XLS dosyalarını yazan sınıf"""
+ __günAdı={0:"Pazartesi",1:"Salı",2:"Çarşamba",3:"Perşembe",4:"Cuma",5:"Cumartesi",6:"Pazar"}
+ 
+ def __init__(self,
+              ay=ay,
+              yıl=yıl,
+              sz=aysözlük,
+              ünvan="Ecz.",
+              başlık=("Tarih","Gün","Ünvan","Nöbetçi Adı","Yardımcı Personel"),
+              ):
+  #style0 = xlwt.easyxf('font: name Times New Roman, color-index red, bold on', num_format_str='#,##0.00')
+  #style1 = xlwt.easyxf(num_format_str="dd/mm/yyyy")
+  #self.date_format = xlwt.XFStyle()
+  #self.date_format.num_format_str = 'dd/mm/yyyy'  #ÇALIŞMIYOR bakılacak
+  #ws.col(0).set_style(self.date_format)
+  self.dosyaadı=str(yıl)[2:4]+"{0:0=2d}".format(ay)+".xls"
+  self.wb = xlwt.Workbook()
+  self.ws = wb.add_sheet(str(ay)+str(yıl))
+  
+ def sütunOluştur(self,sütunNo,liste,stil): #KULLANIMDA DEĞİL. tarih formatına çözüm olarak yapmıştım olmadı.
+  for n,girdi in enumerate(liste):
+   self.ws.write(sütunNo,n,girdi,stil)
+
+ #sütunOluştur(ws,0,sz,style1)
+ #sütunOluştur(ws,0,sz,style1)
+ #sütunOluştur(ws,0,sz.values(),style1)
+ 
+ def satırOluştur(self,satırNo,liste,):
+  for n,girdi in enumerate(liste):
+   self.ws.write(satırNo,n,girdi)
+  
+ def sayfaOluştur(self):
+  satırOluştur(ws,0,başlık)
+  for g in sz:
+   self.satırOluştur(ws,g,(calendar.datetime.date(yıl,ay,g),__günAdı[calendar.datetime.date(yıl,ay,g).weekday()],ünvan,sz[g],))
+ 
+ def kaydet(self):
+  wb.save(dosyaadı)  
+  
+ #ws.write(0, 0, 1234.56, style0)
+ #ws.write(1, 0, datetime.now(), style1)
+ #ws.write(2, 0, 1)
+ #ws.write(2, 1, 1)
+ #ws.write(2, 2, xlwt.Formula("A3+B3"))
+ 
+ 
+class GUI:
+ """Arayüz sınıfı"""
+ def __init__(self,
+              sg=sg,
+              ay=ay,
+              yıl=yıl,
+              çlşDiz=çlşDiz,
+              üyeler=üyeler,
+              çıktı=VT.çıktı,
+              ek=VT.ek,
+              value="",
+              ekle="",
+              sil="",
+              sonüyeler=okuveyaz.XLSoku(VT,max(dizindekiXLSler))#son listeyi belirlemek için
+              ):
+  sg.theme('DarkAmber')   
+  self.aralık=VT.aralık
+  self.ay=ay
+  self.yıl=yıl
+  self.çlşDiz=çlşDiz
+  self.üyeler=üyeler
+  self.çıktı=çıktı
+  self.ek=ek
+  self.sonüyeler=sonüyeler
+  üyeler={i:{} for i in sonüyeler.values()}#son listedeki üyeleri belirlemek için
+  self.window = sg.Window('NöbetGen', self.layout())
+  self.eventLoop()
+ 
+ def üyeTablosu(self,üyeler,çerçevebaşlığı):#
+  üyetablosu=""
+  for üye in üyeler:
+   a="[sg.I(key='{}',default_text='{}'),sg.I(key='mazeret{}',default_text='{}'),sg.Btn('sil')],".format(üye,üye,üye,üyeler[üye])
+   üyetablosu+=a
+  üyetablosu+="[sg.B('ekle')]"
+  
+  return üyetablosu 
+ def layout(self):
+  üyelersekme=eval(self.üyeTablosu(üyeler,"Üyeler"))
+  ayarlarsekme=[
+   [sg.T('Önceki nöbet listelerinin olduğu dizin:'),sg.I(default_text=çlşDiz),sg.FolderBrowse(key="çlşDiz",tooltip="Klasör seçme penceresi açılır",button_text="Klasör Aç")],
+   [sg.I(key="yıl",default_text=str(yıl), size=(4,4),), sg.T(" yılı "), sg.I(key="ay",default_text=str(ay), size=(2,4),), sg.T(" ayı için nöbet oluşturulacak."),], 
+   [sg.I(key="aralık",default_text=str(self.aralık), size=(1,4),), sg.T(' gün aralıkla nöbet verilir')], 
+   [sg.T('Verilebilecek ek nöbet sayısı: '), sg.I(key="ek",default_text=str(self.ek), size=(1,4),)],
+   ]
+  işlenentablolartab= [[sg.Multiline(size=(30,20),key="işlenentablo",autoscroll=True)]]
+  çıktıtab= [[sg.Multiline(size=(30,20),key="çıktı",autoscroll=True)]]
+  sonuçtab= [[sg.Multiline(size=(30,20),key="sonuç",autoscroll=True)]]
+  eşleşmeyentab= [[sg.Multiline(size=(30,20),key="eşleşmeyen",autoscroll=True)]] 
+  sekmegurubu=[sg.TabGroup(
+    [[
+    sg.Tab('AYARLAR', ayarlarsekme), 
+    sg.Tab('ÜYELER', üyelersekme),
+    sg.Tab('İŞLENEN TABLOLAR', işlenentablolartab),
+    sg.Tab('ÇIKTI', çıktıtab), 
+    sg.Tab('SONUÇ', sonuçtab), 
+    sg.Tab('EŞLEŞMEYEN', eşleşmeyentab),
+    ]]
+  )]
+  eylembutonları=[sg.B("Üret"), sg.B("Kaydet"), sg.B("Çıkış")]
+ 
+  layout = [sekmegurubu,eylembutonları]
+  return layout
+ 
+ def eventLoop(self):
+  window=self.window
+  while True:
+   event, value = window.read()
+   if event in ('Çıkış'):
+    del self
+    break
+   if event=="Üret": çalıştır()
+   if event=="Kaydet":  okuveyaz()
+   ay=value["ay"]
+   yıl=value["yıl"]
+   aralık=value["aralık"]
+   ek=value["ek"]
+   çlşDiz=value["çlşDiz"]
+   window["çıktı"].update(VT.çıktı)
+   window["sonuç"].update(VT.çıktı["Sonuç"])
+   window["eşleşmeyen"].update(VT.eşleşmeyenÜye)
+   window["işlenentablo"].update(VT.işlenenXLS)
+ 
