@@ -22,23 +22,24 @@ aysözlük={i+1:0 for i in range(buay[1])} #programın sonunda günlere üye tut
 nöbetgünleri=("PSÇ","Pe","Cu","Ct","Pa") #gün kümelerinin demeti. aynı öneme sahip olan pazartesi salı çarşamba günleri aynı kümeye alındı.
 günindeks={0:"PSÇ",1:"PSÇ",2:"PSÇ",3:"Pe",4:"Cu",5:"Ct",6:"Pa"}
 dizindekiXLSler=[dosya for dosya in os.listdir(os.getcwd()) if ".xls" in dosya if "~" not in dosya]
-
+VT=VeriTabanı()
 
 def büyükHarfli(ad):
  ad=ad.replace("i","İ")
  return ad.upper()
 
-class VT:
+class VeriTabanı:
  """global değişkenlerin kolay ulaşılabilmesi için class variable olarak atanması"""
- işlenenXLS=set()
- db={}
- çekilenVeri={}
- çıktı={"Üye Kontrol Çıktısı":"",}
- eşleşmeyenÜye=set()
- eşleşmeyenGünler={}
- işlenenGünler={}
- ek=0  #üyelere verilecek ek nöbet sayısı
- aralık=2 #üyenin ne kadar aralıklı nöbet alacağı
+ def __init__():
+  işlenenXLS=set()
+  db={}
+  çekilenVeri={}
+  çıktı={"Üye Kontrol Çıktısı":"",}
+  eşleşmeyenÜye=set()
+  eşleşmeyenGünler={}
+  işlenenGünler={}
+  ek=0  #üyelere verilecek ek nöbet sayısı
+  aralık=2 #üyenin ne kadar aralıklı nöbet alacağı
 
  def çıktıEkle(self,key,value):
   self.çıktı[key]=value
@@ -215,6 +216,7 @@ class okuveyaz:
 
 
 def çalıştır():
+ VT=VeriTabanı()
  VT.db={üye:{gk:0 for gk in günindeks.values()} for üye in üyeler} 
  çıktı=""
  for dosya in dizindekiXLSler: VT.çekilenVeri.update(okuveyaz.XLSoku(VT,dosya)) # geçmiş tarih-nöbetçi bilgisini dizindeki XLS lerden VT.çekilenVeri ye kaydeder
