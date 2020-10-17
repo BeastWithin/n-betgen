@@ -22,7 +22,6 @@ aysözlük={i+1:0 for i in range(buay[1])} #programın sonunda günlere üye tut
 nöbetgünleri=("PSÇ","Pe","Cu","Ct","Pa") #gün kümelerinin demeti. aynı öneme sahip olan pazartesi salı çarşamba günleri aynı kümeye alındı.
 günindeks={0:"PSÇ",1:"PSÇ",2:"PSÇ",3:"Pe",4:"Cu",5:"Ct",6:"Pa"}
 dizindekiXLSler=[dosya for dosya in os.listdir(os.getcwd()) if ".xls" in dosya if "~" not in dosya]
-VT=VeriTabanı()
 
 def büyükHarfli(ad):
  ad=ad.replace("i","İ")
@@ -30,17 +29,19 @@ def büyükHarfli(ad):
 
 class VeriTabanı:
  """global değişkenlerin kolay ulaşılabilmesi için class variable olarak atanması"""
- def __init__():
-  işlenenXLS=set()
-  db={}
-  çekilenVeri={}
-  çıktı={"Üye Kontrol Çıktısı":"",}
-  eşleşmeyenÜye=set()
-  eşleşmeyenGünler={}
-  işlenenGünler={}
-  ek=0  #üyelere verilecek ek nöbet sayısı
-  aralık=2 #üyenin ne kadar aralıklı nöbet alacağı
-
+ def __init__(self):
+  self.işlenenXLS=set()
+  self.db={}
+  self.çekilenVeri={}
+  self.çıktı={"Üye Kontrol Çıktısı":"","Sonuç":"",}
+  self.eşleşmeyenÜye=set()
+  self.eşleşmeyenGünler={}
+  self.işlenenGünler={}
+  self.ek=0  #üyelere verilecek ek nöbet sayısı
+  self.aralık=2 #üyenin ne kadar aralıklı nöbet alacağı
+ 
+ 
+ 
  def çıktıEkle(self,key,value):
   self.çıktı[key]=value
  def çıktıDök():
@@ -48,6 +49,7 @@ class VeriTabanı:
    print(i+"\n"+VT.çıktı[i])
  
  
+VT=VeriTabanı()
 
 
 #for i in üyeler: #mazeretgün den get error vermemesi için eksik üyeler eklemek
@@ -172,7 +174,7 @@ def rastgeleİşle():#ay içinden rastgele seçip işleyen
  for a in üyeler:
   çıktı+=a+" "+str([i for i in aysözlük.values()].count(a))+"\n"
  çıktı+="Boş günlerin sayısı"+" "+str([i for i in aysözlük.values()].count(0))+"\n"
- VT().çıktıEkle("Üyelere atanan gün sayıları",çıktı)
+ VT.çıktıEkle("Üyelere atanan gün sayıları",çıktı)
 
 
 class okuveyaz:
@@ -399,4 +401,6 @@ class GUI:
    window["sonuç"].update(VT.çıktı["Sonuç"])
    window["eşleşmeyen"].update(VT.eşleşmeyenÜye)
    window["işlenentablo"].update(VT.işlenenXLS)
- 
+   
+   
+   
