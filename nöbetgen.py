@@ -228,6 +228,8 @@ def çalıştır():
  rastgeleİşle()
  for i in aysözlük: çıktı+=str(i)+" "+str(aysözlük[i])+"\n"
  VT.çıktı["Sonuç"]=çıktı
+ 
+def kaydet():
  xlyaz()
 
 
@@ -290,8 +292,11 @@ class XLSyaz:
   #self.date_format.num_format_str = 'dd/mm/yyyy'  #ÇALIŞMIYOR bakılacak
   #ws.col(0).set_style(self.date_format)
   self.dosyaadı=str(yıl)[2:4]+"{0:0=2d}".format(ay)+".xls"
+  self.başlık=başlık
   self.wb = xlwt.Workbook()
-  self.ws = wb.add_sheet(str(ay)+str(yıl))
+  self.ws = self.wb.add_sheet(str(ay)+str(yıl))
+  self.sayfaOluştur(self.ws)
+  self.kaydet
   
  def sütunOluştur(self,sütunNo,liste,stil): #KULLANIMDA DEĞİL. tarih formatına çözüm olarak yapmıştım olmadı.
   for n,girdi in enumerate(liste):
@@ -305,10 +310,10 @@ class XLSyaz:
   for n,girdi in enumerate(liste):
    self.ws.write(satırNo,n,girdi)
   
- def sayfaOluştur(self):
-  satırOluştur(ws,0,başlık)
+ def sayfaOluştur(self,ws):
+  self.satırOluştur(ws,0,self.başlık)
   for g in sz:
-   self.satırOluştur(ws,g,(calendar.datetime.date(yıl,ay,g),__günAdı[calendar.datetime.date(yıl,ay,g).weekday()],ünvan,sz[g],))
+   self.satırOluştur(ws,g,(calendar.datetime.date(yıl,ay,g),XLSyaz.__günAdı[calendar.datetime.date(yıl,ay,g).weekday()],ünvan,sz[g],))
  
  def kaydet(self):
   wb.save(dosyaadı)  
@@ -391,7 +396,7 @@ class GUI:
     del self
     break
    if event=="Üret": çalıştır()
-   if event=="Kaydet":  okuveyaz()
+   if event=="Kaydet":  kaydet()
    ay=value["ay"]
    yıl=value["yıl"]
    aralık=value["aralık"]
@@ -401,6 +406,5 @@ class GUI:
    window["sonuç"].update(VT.çıktı["Sonuç"])
    window["eşleşmeyen"].update(VT.eşleşmeyenÜye)
    window["işlenentablo"].update(VT.işlenenXLS)
-   
    
    
