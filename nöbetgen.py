@@ -96,18 +96,20 @@ def EnAzGünKümesiniBulma():
 class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvimde ilgili güne yazar, o güne 1 ekler
  
 
- def __init__(self,gün=0, ):
+ def __init__(self,gün=0,VT=VT,db=VT.db,aysözlük=aysözlük ):
   self.ek=VT.ek
-  
+  self.üye=0
 
   if gün:
    self.günküme=self.aydakigünkümesi(gün)
    self.üyelistesi=self.EnazGünSay(self.günküme,VT.db)
    self.nöbetyaz(gün,VT.aralık)
-  
+  else:
+   return print("Gün sırası belirtilmeli")
   
  def EnazGünSay(self,günküme,db): #üyeler arasında belirtilen günün en az kim tarafından tutulduğunu ve ne kadar tutulduğunu döndürür.
   sıralı=[(db[üye][gün],üye) for üye in db for gün in db[üye] if gün==günküme] #min() fonksiyonu ilk sıradaki girdiye göre sıralar, bunlar eşitse ikinciye göre sıralamaya devam eder
+  print(db)
   sıralı.sort() #sort küçükten büyüğe sıralıyor.
   return sıralı
  
@@ -147,7 +149,6 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
    üye=i[1]
    if self.üyekontrol(üye,gün,VT.aralık,VT.ek):
     aysözlük[gün]=üye
-    self.üye=üye
     self.DB1Arttır(üye,self.günküme)
     break
 
@@ -275,7 +276,7 @@ def xlyaz(ay=ay,
  dosyaadı=str(yıl)[2:4]+"{0:0=2d}".format(ay)+".xls"
  wb.save(dosyaadı) 
  
-class XLSyaz:
+class XLSyaz: #işlemiyor
  """XLS dosyalarını yazan sınıf"""
  __günAdı={0:"Pazartesi",1:"Salı",2:"Çarşamba",3:"Perşembe",4:"Cuma",5:"Cumartesi",6:"Pazar"}
  
