@@ -5,17 +5,16 @@ import calendar,random,xlwt,xlrd,os
 import PySimpleGUI as sg
 
 
-çlşDiz=os.getcwd()
 yıl,ay=2020,6 #hangi tarih için nöbet hazırlanacağı
 üyeler={ # üyeler ve mazeret günlerini içeren dict
-         'ELİF ÖZCAN':{},
-         'YÜKSEL AKGÜNEŞ':{},
-         'BEDİRHAN SÜZEN':{},
-         'SİNAN CENGİZ':{1,2,3,4,5,6,7,8,9,10},
-         'ŞERİFE ÖZSU':{},
-         'DEMET HALLAÇ':{},
-         'ÖZGEN BAKTIR KARADAŞ':{},
-         'PINAR EKMEKÇİOĞLU':{},
+         #'ELİF ÖZCAN':{},
+         #'YÜKSEL AKGÜNEŞ':{},
+         #'BEDİRHAN SÜZEN':{},
+         #'SİNAN CENGİZ':{1,2,3,4,5,6,7,8,9,10},
+         #'ŞERİFE ÖZSU':{},
+         #'DEMET HALLAÇ':{},
+         #'ÖZGEN BAKTIR KARADAŞ':{},
+         #'PINAR EKMEKÇİOĞLU':{},
          }
 buay=calendar.monthrange(yıl,ay) #ayın 1'i haftanın hangi günü ve ayın kaç gün olduğunu döndüren işlev
 aysözlük={i+1:0 for i in range(buay[1])} #programın sonunda günlere üye tutacak üye adlarının yazacağı takvim.
@@ -29,6 +28,7 @@ def büyükHarfli(ad):
 
 class VeriTabanı:
  """global değişkenlerin kolay ulaşılabilmesi için class variable olarak atanması"""
+ çlşDiz=os.getcwd() 
  def __init__(self):
   self.işlenenXLS=set()
   self.db={}
@@ -44,20 +44,29 @@ class VeriTabanı:
  
  def çıktıEkle(self,key,value):
   self.çıktı[key]=value
- def çıktıDök():
+ def çıktıDök(self):
   for i in VT.çıktı:
-   print(i+"\n"+VT.çıktı[i])
+   return str(i+"\n"+VT.çıktı[i])
+ def istatistikDök(self):
+  d=""
+  for üye in VT.db:
+   d+=str(üye)+"\n"
+   for gün in VT.db[üye]:
+    d+=str(str(gün)+": "+str(VT.db[üye][gün]))+"\t"
+   d+="\n"
+  return d
+ def çıktıDökdüzenli(self,ç):
+  p=""
+  ç=list(ç)
+  ç.sort()
+  for i in ç:
+   p+=str(i)+"\n"
+  return p
  
  
 VT=VeriTabanı()
 
 
-#for i in üyeler: #mazeretgün den get error vermemesi için eksik üyeler eklemek
- #if i not in mazeretgün:
-  #mazeretgün[i]=[]
-  
-#üyedengüne={i:{i:0 for i in nöbetgünleri} for i in mazeretgün}
-#gündenüyeye={i:{i:0 for i in mazeretgün} for i in nöbetgünleri}
 #db={"sinan":{"PSÇ":45,"Pe":35,"Cu":48,"Ct":56,"Pa":32},
     #"pınar":{"PSÇ":31,"Pe":41,"Cu":41,"Ct":46,"Pa":33},
     #"demet":{"PSÇ":15,"Pe":35,"Cu":44,"Ct":51,"Pa":38},
@@ -96,20 +105,24 @@ def EnAzGünKümesiniBulma():
 class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvimde ilgili güne yazar, o güne 1 ekler
  
 
- def __init__(self,gün=0,VT=VT,db=VT.db,aysözlük=aysözlük ):
-  self.ek=VT.ek
+ def __init__(self,
+              gün,
+              aralık,
+              db,
+              aysözlük,
+              ekgünsayısı,
+              ):
+  self.ek=ekgünsayısı
   self.üye=0
-
   if gün:
    self.günküme=self.aydakigünkümesi(gün)
-   self.üyelistesi=self.EnazGünSay(self.günküme,VT.db)
-   self.nöbetyaz(gün,VT.aralık)
+   self.üyelistesi=self.EnazGünSay(self.günküme,db)
+   self.nöbetyaz(gün,aralık)
   else:
    return print("Gün sırası belirtilmeli")
   
  def EnazGünSay(self,günküme,db): #üyeler arasında belirtilen günün en az kim tarafından tutulduğunu ve ne kadar tutulduğunu döndürür.
   sıralı=[(db[üye][gün],üye) for üye in db for gün in db[üye] if gün==günküme] #min() fonksiyonu ilk sıradaki girdiye göre sıralar, bunlar eşitse ikinciye göre sıralamaya devam eder
-  print(db)
   sıralı.sort() #sort küçükten büyüğe sıralıyor.
   return sıralı
  
@@ -131,7 +144,6 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
      return False  
   def nöbetalmasayısıkontrol():#üyenin ay içindeki nöbet sayısı, aydaki gün sayısının üye sayısına bölümüne eşit mi?
    return int(len(aysözlük)/len(üyeler))+ek==[i for i in aysözlük.values()].count(üye) 
-  print(üyeler)
   if gün in üyeler.get(üye): #üye için mazeret günü mü? MAZERET KONTROL
    çıktı[ç]+=str(gün)+". gün için, "+str(üye)+" nin mazeret günü\n"
    return False
@@ -170,7 +182,7 @@ def rastgeleİşle():#ay içinden rastgele seçip işleyen
  liste=[i for i in aysözlük if not aysözlük[i]] #üye atanmamış günleri süzmek için
  while liste:
   i=random.choice(liste)
-  işle(gün=i,)
+  işle(i,VT.aralık,VT.db,aysözlük,VT.ek)
   liste.remove(i)
  for a in üyeler:
   çıktı+=a+" "+str([i for i in aysözlük.values()].count(a))+"\n"
@@ -179,13 +191,10 @@ def rastgeleİşle():#ay içinden rastgele seçip işleyen
 
 
 class okuveyaz:
- if çlşDiz:
-  os.chdir(çlşDiz)
- else:
-  çlşDiz=os.getcwd()
+
  def XLSoku(VT,dosya):
   çekilenveri={}
-  açılanXLS = xlrd.open_workbook(os.path.join(çlşDiz,dosya))
+  açılanXLS = xlrd.open_workbook(os.path.join(VT.çlşDiz,dosya))
   açılanXLS = açılanXLS.sheet_by_index(0) # xls deki ilk sayfaya odaklanmak
   VT.işlenenXLS.add(dosya) #hangi xls lerin işlendiğine sonra bakabilmek için 
   for satırnumarası in range(açılanXLS.nrows):#ilk satırı atlayarak satırları ele almak
@@ -219,6 +228,8 @@ class okuveyaz:
 
 
 def çalıştır():
+ global VT
+ os.chdir(VT.çlşDiz) 
  VT=VeriTabanı()
  VT.db={üye:{gk:0 for gk in günindeks.values()} for üye in üyeler} 
  çıktı=""
@@ -332,48 +343,45 @@ class GUI:
               sg=sg,
               ay=ay,
               yıl=yıl,
-              çlşDiz=çlşDiz,
-              üyeler=üyeler,
               çıktı=VT.çıktı,
               ek=VT.ek,
-              value="",
               ekle="",
               sil="",
-              sonüyeler=okuveyaz.XLSoku(VT,max(dizindekiXLSler))#son listeyi belirlemek için
               ):
+  global üyeler
   sg.theme('DarkAmber')   
   self.aralık=VT.aralık
   self.ay=ay
   self.yıl=yıl
-  self.çlşDiz=çlşDiz
-  self.üyeler=üyeler
   self.çıktı=çıktı
   self.ek=ek
-  self.sonüyeler=sonüyeler
+  self.sonXLS=max(dizindekiXLSler)
+  sonüyeler=okuveyaz.XLSoku(VT,self.sonXLS)#son listeyi belirlemek için
   üyeler={i:{} for i in sonüyeler.values()}#son listedeki üyeleri belirlemek için
   self.window = sg.Window('NöbetGen', self.layout())
   self.eventLoop()
  
  def üyeTablosu(self,üyeler,çerçevebaşlığı):#
-  üyetablosu=""
+  üyetablosu="[sg.T('Üyeler, {} adlı listeden çekildi.')],".format(self.sonXLS)
   for üye in üyeler:
-   a="[sg.I(key='{}',default_text='{}'),sg.I(key='mazeret{}',default_text='{}'),sg.Btn('sil')],".format(üye,üye,üye,üyeler[üye])
+   a="[sg.I(key='{}',default_text='{}'),sg.I(key='mazeret{}',default_text='{}'),sg.Btn('Sil',key='silüye'),],".format(üye,üye,üye,üyeler[üye],üye)
    üyetablosu+=a
-  üyetablosu+="[sg.B('ekle')]"
+  üyetablosu+="[sg.B('ekle')],[sg.B('Mazeret Kaydet')]"
   
   return üyetablosu 
  def layout(self):
   üyelersekme=eval(self.üyeTablosu(üyeler,"Üyeler"))
   ayarlarsekme=[
-   [sg.T('Önceki nöbet listelerinin olduğu dizin:'),sg.I(default_text=çlşDiz),sg.FolderBrowse(key="çlşDiz",tooltip="Klasör seçme penceresi açılır",button_text="Klasör Aç")],
+   [sg.T('Önceki nöbet listelerinin olduğu dizin:'),sg.I(default_text=VT.çlşDiz, key="çlşDiz"),sg.FolderBrowse(tooltip="Klasör seçme penceresi açılır",button_text="Klasör Aç")],
    [sg.I(key="yıl",default_text=str(yıl), size=(4,4),), sg.T(" yılı "), sg.I(key="ay",default_text=str(ay), size=(2,4),), sg.T(" ayı için nöbet oluşturulacak."),], 
    [sg.I(key="aralık",default_text=str(self.aralık), size=(1,4),), sg.T(' gün aralıkla nöbet verilir')], 
    [sg.T('Verilebilecek ek nöbet sayısı: '), sg.I(key="ek",default_text=str(self.ek), size=(1,4),)],
    ]
   işlenentablolartab= [[sg.Multiline(size=(30,20),key="işlenentablo",autoscroll=True)]]
   çıktıtab= [[sg.Multiline(size=(30,20),key="çıktı",autoscroll=True)]]
-  sonuçtab= [[sg.Multiline(size=(30,20),key="sonuç",autoscroll=True)]]
+  sonuçtab= [[sg.Multiline(size=(30,20),key="sonuç",autoscroll=False)]]
   eşleşmeyentab= [[sg.Multiline(size=(30,20),key="eşleşmeyen",autoscroll=True)]] 
+  istatistik=[[sg.T(VT.db,key="istatistik",size=(90,20))]]
   sekmegurubu=[sg.TabGroup(
     [[
     sg.Tab('AYARLAR', ayarlarsekme), 
@@ -382,30 +390,52 @@ class GUI:
     sg.Tab('ÇIKTI', çıktıtab), 
     sg.Tab('SONUÇ', sonuçtab), 
     sg.Tab('EŞLEŞMEYEN', eşleşmeyentab),
+    sg.Tab('İSTATİSTİK', istatistik),
+    
     ]]
   )]
-  eylembutonları=[sg.B("Üret"), sg.B("Kaydet"), sg.B("Çıkış")]
+  eylembutonları=[sg.B("Üret"), sg.B("Kaydet"),
+                   #sg.B("Çıkış"),
+                   ]
  
   layout = [sekmegurubu,eylembutonları]
   return layout
  
  def eventLoop(self):
+  def yenile():
+   window["çıktı"].update(VT.çıktıDök())
+   window["sonuç"].update(VT.çıktı["Sonuç"])
+   window["eşleşmeyen"].update(VT.eşleşmeyenÜye)
+   window["işlenentablo"].update(VT.çıktıDökdüzenli(VT.işlenenXLS))
+   window["istatistik"].update(VT.istatistikDök())   
+   
   window=self.window
   while True:
    event, value = window.read()
-   if event in ('Çıkış'):
-    del self
-    break
-   if event=="Üret": çalıştır()
+   print(event)
+   print(value)
+   if event in (None,'Çıkış'):
+    return event, window.close()
+   if event=="Üret":
+    çalıştır()
+    yenile()
    if event=="Kaydet":  kaydet()
+   if event=="Mazeret Kaydet":
+    for i in value:
+     if type(i)==str:
+      if "mazeret" in i:
+       üyeler[i.strip("mazeret")]=eval(value[i])
+   
    ay=value["ay"]
    yıl=value["yıl"]
    aralık=value["aralık"]
    ek=value["ek"]
-   çlşDiz=value["çlşDiz"]
-   window["çıktı"].update(VT.çıktı)
-   window["sonuç"].update(VT.çıktı["Sonuç"])
-   window["eşleşmeyen"].update(VT.eşleşmeyenÜye)
-   window["işlenentablo"].update(VT.işlenenXLS)
    
    
+   VT.çlşDiz=value["çlşDiz"]
+
+   
+
+
+if __name__ == "__main__":
+ GUI()
