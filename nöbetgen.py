@@ -16,8 +16,9 @@ yıl,ay=2020,6 #hangi tarih için nöbet hazırlanacağı
          #'ÖZGEN BAKTIR KARADAŞ':{},
          #'PINAR EKMEKÇİOĞLU':{},
          }
+
 buay=calendar.monthrange(yıl,ay) #ayın 1'i haftanın hangi günü ve ayın kaç gün olduğunu döndüren işlev
-aysözlük={i+1:0 for i in range(buay[1])} #programın sonunda günlere üye tutacak üye adlarının yazacağı takvim.
+_aysözlük={i+1:0 for i in range(buay[1])} #programın sonunda günlere üye tutacak üye adlarının yazacağı takvim.
 nöbetgünleri=("PSÇ","Pe","Cu","Ct","Pa") #gün kümelerinin demeti. aynı öneme sahip olan pazartesi salı çarşamba günleri aynı kümeye alındı.
 günindeks={0:"PSÇ",1:"PSÇ",2:"PSÇ",3:"Pe",4:"Cu",5:"Ct",6:"Pa"}
 dizindekiXLSler=[dosya for dosya in os.listdir(os.getcwd()) if ".xls" in dosya if "~" not in dosya]
@@ -33,12 +34,16 @@ class VeriTabanı:
   self.işlenenXLS=set()
   self.db={}
   self.çekilenVeri={}
-  self.çıktı={"Üye Kontrol Çıktısı":"","Sonuç":"",}
+  self.çıktı={"Üye Kontrol Çıktısı":"",
+                 #"Sonuç":"",
+                 }
   self.eşleşmeyenÜye=set()
   self.eşleşmeyenGünler={}
   self.işlenenGünler={}
   self.ek=0  #üyelere verilecek ek nöbet sayısı
   self.aralık=2 #üyenin ne kadar aralıklı nöbet alacağı
+  self.aysözlük={i+1:0 for i in range(buay[1])} #programın sonunda günlere üye tutacak üye adlarının yazacağı takvim.
+
  
  
  
@@ -62,6 +67,11 @@ class VeriTabanı:
   for i in ç:
    p+=str(i)+"\n"
   return p
+ def çıktıDökSonuç(self,s): #aysözlük çıktısını GUI de görebilmek için
+  ç=""
+  for k in s: ç+=str(k)+":\t"+str(s[k])+"\n"
+  return ç
+ 
  
  
 VT=VeriTabanı()
@@ -117,7 +127,7 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
   if gün:
    self.günküme=self.aydakigünkümesi(gün)
    self.üyelistesi=self.EnazGünSay(self.günküme,db)
-   self.nöbetyaz(gün,aralık)
+   self.nöbetyaz(gün,aralık,aysözlük)
   else:
    return print("Gün sırası belirtilmeli")
   
@@ -129,7 +139,7 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
  def DB1Arttır(self,üye,günküme): #nöbet yazılan üyenin ilgili gün için nöbet sayısını 1 arttırır.
   VT.db[üye][günküme]+=1
  
- def üyekontrol(self,üye,gün,aralık,ek):
+ def üyekontrol(self,üye,gün,aralık,ek,aysözlük):
   """Sırasıyla;
   Belirtilen gün üyenin mazeret günü mü,
   üyenin aydaki alacağı en çok nöbet sayısını geçiyor mu,
@@ -138,11 +148,11 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
   çıktı=VT.çıktı
   ç="Üye Kontrol Çıktısı"
   
-  def günaralıkkontrol():
+  def günaralıkkontrol(aysözlük=aysözlük):
    for i in [i+gün for i in range(-1*aralık,aralık+1) if len(aysözlük)>=i+gün>0]:#verilen günün, belirtilen aralık kadar öncesinden sonrasına kadar nöbeti varmı diye sorgulayan fonksiyon
     if aysözlük[i]==üye:
      return False  
-  def nöbetalmasayısıkontrol():#üyenin ay içindeki nöbet sayısı, aydaki gün sayısının üye sayısına bölümüne eşit mi?
+  def nöbetalmasayısıkontrol(aysözlük=aysözlük):#üyenin ay içindeki nöbet sayısı, aydaki gün sayısının üye sayısına bölümüne eşit mi?
    return int(len(aysözlük)/len(üyeler))+ek==[i for i in aysözlük.values()].count(üye) 
   if gün in üyeler.get(üye): #üye için mazeret günü mü? MAZERET KONTROL
    çıktı[ç]+=str(gün)+". gün için, "+str(üye)+" nin mazeret günü\n"
@@ -156,10 +166,10 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
   else:
     return True
       
- def nöbetyaz(self,gün,aralık): #aysözlüke bulunan üyeyi ilgili güne yazmak için 
+ def nöbetyaz(self,gün,aralık,aysözlük): #aysözlüke bulunan üyeyi ilgili güne yazmak için 
   for i in self.üyelistesi:
    üye=i[1]
-   if self.üyekontrol(üye,gün,VT.aralık,VT.ek):
+   if self.üyekontrol(üye,gün,VT.aralık,VT.ek,aysözlük):
     aysözlük[gün]=üye
     self.DB1Arttır(üye,self.günküme)
     break
@@ -177,7 +187,7 @@ class işle: #belirtilen günkümesini en az tutmuş üyeyi bulup,o üyeyi takvi
 
 
 
-def rastgeleİşle():#ay içinden rastgele seçip işleyen
+def rastgeleİşle(aysözlük):#ay içinden rastgele seçip işleyen
  çıktı=""
  liste=[i for i in aysözlük if not aysözlük[i]] #üye atanmamış günleri süzmek için
  while liste:
@@ -227,19 +237,20 @@ class okuveyaz:
 
 
 
-def çalıştır():
+def çalıştır(aysözlük=VT.aysözlük):
  global VT
  os.chdir(VT.çlşDiz) 
- VT=VeriTabanı()
+ VT=VeriTabanı() #çalıştır fonksiyonu her çalıştırıldığında yeni tarama yapması için yeni örnek üretiyor.
+ #!!!!!!!!!!!!!!!! ama şimdi çalışmıyor
  VT.db={üye:{gk:0 for gk in günindeks.values()} for üye in üyeler} 
  çıktı=""
  for dosya in dizindekiXLSler: VT.çekilenVeri.update(okuveyaz.XLSoku(VT,dosya)) # geçmiş tarih-nöbetçi bilgisini dizindeki XLS lerden VT.çekilenVeri ye kaydeder
  okuveyaz.vtYaz(VT,VT.çekilenVeri)
- rastgeleİşle()
+ rastgeleİşle(VT.aysözlük)
  VT.ek=1
- rastgeleİşle()
- for i in aysözlük: çıktı+=str(i)+" "+str(aysözlük[i])+"\n"
- VT.çıktı["Sonuç"]=çıktı
+ rastgeleİşle(VT.aysözlük)
+ #for i in aysözlük: çıktı+=str(i)+" "+str(aysözlük[i])+"\n"
+ #VT.çıktı["Sonuç"]=çıktı
  
 def kaydet():
  xlyaz()
@@ -247,7 +258,7 @@ def kaydet():
 
 def xlyaz(ay=ay,
           yıl=yıl,
-          sz=aysözlük,
+          sz=VT.aysözlük,
           ünvan="Ecz.",
           başlık=("Tarih","Gün","Ünvan","Nöbetçi Adı","Yardımcı Personel"),
           ):
@@ -294,7 +305,7 @@ class XLSyaz: #işlemiyor
  def __init__(self,
               ay=ay,
               yıl=yıl,
-              sz=aysözlük,
+              sz=VT.aysözlük,
               ünvan="Ecz.",
               başlık=("Tarih","Gün","Ünvan","Nöbetçi Adı","Yardımcı Personel"),
               ):
@@ -404,7 +415,7 @@ class GUI:
  def eventLoop(self):
   def yenile():
    window["çıktı"].update(VT.çıktıDök())
-   window["sonuç"].update(VT.çıktı["Sonuç"])
+   window["sonuç"].update(VT.çıktıDökSonuç(VT.aysözlük))
    window["eşleşmeyen"].update(VT.eşleşmeyenÜye)
    window["işlenentablo"].update(VT.çıktıDökdüzenli(VT.işlenenXLS))
    window["istatistik"].update(VT.istatistikDök())   
@@ -434,7 +445,6 @@ class GUI:
    
    VT.çlşDiz=value["çlşDiz"]
 
-   
 
 
 if __name__ == "__main__":
