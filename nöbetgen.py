@@ -4,7 +4,7 @@
 import calendar,random,xlwt,xlrd,os
 import PySimpleGUI as sg
 
-
+AD="NöbetGen"
 #yıl,ay=2020,6 #hangi tarih için nöbet hazırlanacağı
 üyeler={ # üyeler ve mazeret günlerini içeren dict
          #'ELİF ÖZCAN':{},
@@ -364,8 +364,9 @@ class GUI:
               ekle="",
               sil="",
               aralık=VT.aralık,
+              progAdı=AD
               ):
-  global üyeler
+  global üyeler,VT
 
  
   sg.theme('DarkAmber')   
@@ -377,7 +378,7 @@ class GUI:
   self.sonXLS=max(dizindekiXLSler)
   sonüyeler=okuveyaz.XLSoku(VT,self.sonXLS)#son listeyi belirlemek için
   üyeler={i:{} for i in sonüyeler.values()}#son listedeki üyeleri belirlemek için
-  self.window = sg.Window('NöbetGen', self.layout(yıl,ay,aralık,ek))
+  self.window = sg.Window(progAdı, self.layout(yıl,ay,aralık,ek))
   self.eventLoop(ay,yıl,aralık,ek)
  
  def üyeTablosu(self,üyeler,çerçevebaşlığı):#
@@ -436,10 +437,10 @@ class GUI:
    if event in (None,'Çıkış'):
     return event, window.close()
    if event=="Üret":
-    ay=value["ay"]
-    yıl=value["yıl"]
-    aralık=value["aralık"]
-    ek=value["ek"]
+    VT.ay=value["ay"]
+    VT.yıl=value["yıl"]
+    VT.aralık=value["aralık"]
+    VT.ek=value["ek"]
     çalıştır()
     yenile()
    if event=="Kaydet":  kaydet()
