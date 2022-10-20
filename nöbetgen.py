@@ -8,14 +8,14 @@ import PySimpleGUI as sg
 çlşDiz=os.getcwd()
 yıl,ay=2020,6 #hangi tarih için nöbet hazırlanacağı
 üyeler={ # üyeler ve mazeret günlerini içeren dict
-         'ELİF ÖZCAN':{},
-         'YÜKSEL AKGÜNEŞ':{},
-         'BEDİRHAN SÜZEN':{},
-         'SİNAN CENGİZ':{1,2,3,4,5,6,7,8,9,10},
-         'ŞERİFE ÖZSU':{},
-         'DEMET HALLAÇ':{},
-         'ÖZGEN BAKTIR KARADAŞ':{},
-         'PINAR EKMEKÇİOĞLU':{},
+         'ELAN':{},
+         'YÜEŞ':{},
+         'BEDİZEN':{},
+         'SGİZ':{1,2,3,4,5,6,7,8,9,10},
+         'ŞEZSU':{},
+         'DELAÇ':{},
+         'ÖZGRADAŞ':{},
+         'PINKÇİOĞLU':{},
          }
 buay=calendar.monthrange(yıl,ay) #ayın 1'i haftanın hangi günü ve ayın kaç gün olduğunu döndüren işlev
 aysözlük={i+1:0 for i in range(buay[1])} #programın sonunda günlere üye tutacak üye adlarının yazacağı takvim.
